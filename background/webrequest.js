@@ -11,15 +11,16 @@ md.webrequest = ({storage: {state}}) => {
   var onCompleted = ({ip, tabId}) => {
     if (ip && ip !== '127.0.0.1' && ip !== '::1') {
       setTimeout(() => {
-        chrome.tabs.sendMessage(tabId, {message: 'autoreload'})
+        chrome.tabs.sendMessage(tabId, {message: 'autoreload'}, () => { void chrome.runtime.lastError })
       }, 500)
     }
   }
 
   var webrequest = () => {
-    if (state.content.autoreload && !chrome.webRequest) {
+    if (state.content.autoreload) {
       // request permissions
-      chrome.permissions.request({permissions}, () => {
+      chrome.permissions.request({permissions}, (granted) => {
+        if (chrome.runtime.lastError || !granted || !chrome.webRequest) return
         // add listener
         chrome.webRequest.onCompleted.addListener(onCompleted, filter)
       })
@@ -29,7 +30,7 @@ md.webrequest = ({storage: {state}}) => {
       chrome.webRequest.onCompleted.removeListener(onCompleted)
       // remove permissions
       chrome.permissions.remove({permissions}, () => {
-        chrome.webRequest = null
+        void chrome.runtime.lastError
       })
     }
   }

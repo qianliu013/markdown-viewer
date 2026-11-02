@@ -4,11 +4,14 @@ var MathJax = {
     pathFilters: [
       ({name}) => name.startsWith('[tex]') ? false : true // keep the name
     ],
-    require: (path) => path.startsWith('[tex]') ?
-      chrome.runtime.sendMessage({
+    require: async (path) => {
+      if (!path.startsWith('[tex]')) return
+      var res = await chrome.runtime.sendMessage({
         message: 'mathjax',
         extension: path.replace('[tex]/', '')
-      }) : null
+      })
+      if (!res || res.error) throw new Error(res && res.error || 'Formula loader unavailable')
+    }
   },
   tex: {
     inlineMath: [
@@ -39,10 +42,10 @@ var MathJax = {
 
 var mj = {
   loaded: false,
-  render: () => {
+  render: async () => {
     mj.loaded = false
-    MathJax.typesetPromise().catch((err) => {
-      console.warn('MathJax rendering failed:', err)
-    }).finally(() => { mj.loaded = true })
+    try { await MathJax.typesetPromise() }
+    catch (err) { console.warn('MathJax rendering failed:', err) }
+    finally { mj.loaded = true }
   }
 }

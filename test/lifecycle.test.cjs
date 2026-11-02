@@ -48,7 +48,7 @@ function worker() {
     h, calls, events,
     start: data => readSettings(data),
     holdWrites: () => {blockWrite = deferred(); return blockWrite},
-    message: req => new Promise(resolve => events.message(req, {tab: {id: 1}}, resolve)),
+    message: (req, sender = {tab: {id: 1}}) => new Promise(resolve => events.message(req, sender, resolve)),
   }
 }
 
@@ -161,4 +161,197 @@ test('auto reload recovers after a file is temporarily emptied while saving', ()
   vm.createContext(h); vm.runInContext(read('content/autoreload.js'), h)
   poll(); poll()
   assert.deepEqual(rendered, ['', 'restored'])
+})
+
+
+test('invalid stored origins are repaired, intentional removals and disabled rules are preserved', async () => {
+  for (const origins of [null, false, [], 'invalid']) {
+    const w = worker(); w.start({origins, themes: null})
+    const reply = await w.message({message: 'options.origins'})
+    assert.ok(reply.origins && reply.origins['file://'])
+    w.events.tab(1, {status: 'loading'}, {})
+    await tick()
+    assert.ok(w.calls.some(x => x[0] === 'css'))
+  }
+  for (const origins of [{}, {'file://': {header: false, path: false}}, {'https://invalid.test': null}]) {
+    const w = worker(); w.start({origins})
+    const reply = await w.message({message: 'options.origins'})
+    assert.ok(!reply.error)
+    w.events.tab(1, {status: 'loading'}, {})
+    await tick()
+    assert.equal(w.calls.filter(x => x[0] === 'css').length, 0)
+  }
+})
+
+test('auto reload stops safely when extension messaging is invalidated or returns no response', () => {
+  for (const mode of ['throw', 'missing', 'lastError']) {
+    let poll, stopped = false, count = 0
+    const h = {
+      state: {reload: {ms: 1000}}, location: {protocol: 'file:', href: 'file:///test.md'},
+      XMLHttpRequest: function () {}, console,
+      clearInterval() {stopped = true}, setInterval: cb => {poll = cb; return 1},
+      chrome: {runtime: {sendMessage: (_, done) => {
+        if (++count === 1) return done({body: 'original'})
+        if (mode === 'throw') throw new Error('Extension context invalidated.')
+        if (mode === 'lastError') h.chrome.runtime.lastError = {message: 'Extension context invalidated.'}
+        done()
+      }}},
+      render() {assert.fail('An unavailable response must not replace the displayed document')},
+    }
+    vm.createContext(h); vm.runInContext(read('content/autoreload.js'), h)
+    assert.doesNotThrow(() => poll())
+    assert.equal(stopped, true)
+    poll()
+    assert.equal(count, 2)
+  }
+})
+
+test('scroll fallback tolerates a page whose extension context has been invalidated', async () => {
+  const timers = [], intervals = [], listeners = []
+  const body = {nodeName: 'BODY', scrollTop: 0, addEventListener: (_, cb) => listeners.push(cb)}
+  const h = {
+    state: {raw: false, content: {}},
+    document: {styleSheets: [{}], querySelectorAll: () => [], getElementById() {}},
+    $: s => s === '#_html' || s === '#_toc' ? null : body,
+    location: {hash: '', origin: 'file://', pathname: '/test.md'},
+    localStorage: {getItem() {throw Error('denied')}, setItem() {throw Error('denied')}},
+    chrome: {storage: {local: {get() {throw Error('Extension context invalidated.')}, set() {throw Error('Extension context invalidated.')}}}},
+    window: {addEventListener: (_, cb) => listeners.push(cb)},
+    console: {warn: (...args) => {throw Error('Unexpected scroll failure: ' + args)}},
+    setInterval: cb => {intervals.push(cb)}, clearInterval() {},
+    setTimeout: cb => {timers.push(cb)}, clearTimeout() {},
+  }
+  vm.createContext(h); vm.runInContext(read('content/scroll.js'), h)
+  h.scroll()
+  for (const fn of intervals) fn()
+  await tick()
+  assert.equal(listeners.length, 1)
+  listeners[0]()
+  assert.doesNotThrow(() => timers.at(-1)())
+})
+
+
+test('deferred language and formula injection target their requesting document and report rejection', async () => {
+  const w = worker(); w.start({})
+  for (const message of ['prism', 'mathjax']) {
+    const reply = await w.message({message, language: 'python', extension: 'color'}, {tab: {id: 1}, documentId: 'original-doc'})
+    const script = w.calls.filter(x => x[0] === 'script').at(-1)[1]
+    assert.deepEqual(Array.from(script.target.documentIds || []), ['original-doc'])
+    assert.ok(reply)
+  }
+  w.h.chrome.scripting.executeScript = async () => {throw Error('Document was closed')}
+  const reply = await w.message({message: 'prism', language: 'python'}, {tab: {id: 1}, documentId: 'closed-doc'})
+  assert.match(reply.error, /Document was closed/)
+})
+
+test('Prism calls failure instead of success when its extension connection is lost', () => {
+  for (const mode of ['throw', 'lastError', 'replyError', 'ok']) {
+    let success = 0, failed = 0
+    const h = {Prism: {plugins: {autoloader: {}}}, chrome: {runtime: {sendMessage: (_, done) => {
+      if (mode === 'throw') throw Error('Extension context invalidated.')
+      if (mode === 'lastError') h.chrome.runtime.lastError = {message: 'No receiver'}
+      done(mode === 'replyError' ? {error: 'No document'} : [])
+    }}}}
+    vm.createContext(h); vm.runInContext(read('content/prism.js'), h)
+    assert.doesNotThrow(() => h.Prism.plugins.autoloader.addScript('python', () => success++, () => failed++))
+    assert.equal(success, mode === 'ok' ? 1 : 0)
+    assert.equal(failed, mode === 'ok' ? 0 : 1)
+  }
+})
+
+test('MathJax loader rejects messaging failures and synchronous typesetting failures settle', async () => {
+  const h = {console: {warn() {}}, chrome: {runtime: {getURL: x => x, sendMessage: () => {throw Error('Extension context invalidated.')}}}}
+  vm.createContext(h); vm.runInContext(read('content/mathjax.js'), h)
+  await assert.rejects(async () => h.MathJax.loader.require('[tex]/color'), /invalidated/)
+  h.chrome.runtime.sendMessage = async () => ({error: 'No document'})
+  await assert.rejects(async () => h.MathJax.loader.require('[tex]/color'), /No document/)
+  h.MathJax.typesetPromise = () => {throw Error('Not initialized')}
+  await assert.doesNotReject(async () => h.mj.render())
+  assert.equal(h.mj.loaded, true)
+})
+
+test('HTTP auto reload keeps the current document on failures and does not abort slow reads', () => {
+  let xhr, poll, requests = 0
+  const rendered = []
+  const h = {
+    URL, state: {markdown: 'original', reload: {ms: 1000}}, location: {protocol: 'https:', href: 'https://example.test/a.md?q=1#heading'},
+    XMLHttpRequest: function () {xhr=this;this.open=(_,url)=>{this.url=url;requests++};this.send=()=>{}},
+    setInterval: cb => {poll=cb}, clearInterval() {}, render: s => rendered.push(s), console,
+  }
+  vm.createContext(h); vm.runInContext(read('content/autoreload.js'), h)
+  poll()
+  assert.equal(requests, 1)
+  const url = new URL(xhr.url)
+  assert.equal(url.searchParams.get('q'), '1')
+  assert.ok(url.searchParams.has('preventCache'))
+  assert.equal(url.hash, '')
+  xhr.readyState=4; xhr.status=500; xhr.responseText='server error'; xhr.onreadystatechange()
+  assert.deepEqual(rendered, [])
+  poll(); xhr.status=200; xhr.responseText='updated'; xhr.onreadystatechange()
+  assert.deepEqual(rendered, ['updated'])
+  poll(); xhr.status=0; xhr.responseText=''; xhr.onreadystatechange()
+  assert.deepEqual(rendered, ['updated'])
+})
+
+test('file auto reload allows only one in-flight request and updates against displayed source', () => {
+  let done, poll, requests=0
+  const rendered=[]
+  const h={state:{markdown:'original',reload:{ms:1000}}, location:{protocol:'file:',href:'file:///test.md'},
+    XMLHttpRequest:function(){}, clearInterval(){}, setInterval:cb=>{poll=cb}, render:s=>rendered.push(s), console,
+    chrome:{runtime:{sendMessage:(_,cb)=>{requests++;done=cb}}}}
+  vm.createContext(h); vm.runInContext(read('content/autoreload.js'),h)
+  poll(); assert.equal(requests,1)
+  done({body:'new'}); assert.deepEqual(rendered,['new'])
+  poll(); assert.equal(requests,2)
+})
+
+test('background fetch rejects HTTP failures and preserves existing query parameters', async () => {
+  const urls=[]
+  let status=404
+  const h={md:{},URL,fetch:async url=>{urls.push(new URL(url)); return {ok:status===200,status,text:async()=> 'content'}}}
+  vm.createContext(h); vm.runInContext(read('background/xhr.js'),h)
+  const get=url=>new Promise(resolve=>h.md.xhr().get(url,(err,body)=>resolve({err,body})))
+  const failure=await get('https://example.test/a.md?q=1#anchor')
+  assert.ok(failure.err)
+  assert.equal(failure.body,undefined)
+  assert.equal(urls[0].searchParams.get('q'),'1')
+  assert.ok(urls[0].searchParams.has('preventCache'))
+  assert.equal(urls[0].hash,'')
+  status=200
+  assert.equal((await get('file:///test.md')).body,'content')
+})
+
+test('denied webRequest permission and tabs without content scripts do not throw', async () => {
+  const timers=[]
+  let listener
+  const h={md:{},setTimeout:cb=>timers.push(cb),chrome:{runtime:{},permissions:{request:(_,cb)=>cb(false)},tabs:{sendMessage:(_,req,cb)=>{h.chrome.runtime.lastError={message:'No receiver'};cb()}}}}
+  vm.createContext(h); vm.runInContext(read('background/webrequest.js'),h)
+  const refresh=h.md.webrequest({storage:{state:{content:{autoreload:true}}}})
+  assert.doesNotThrow(refresh)
+  h.chrome.webRequest={onCompleted:{addListener:cb=>{listener=cb}}}
+  h.md.webrequest({storage:{state:{content:{autoreload:true}}}})
+  listener({ip:'1.2.3.4',tabId:1})
+  assert.doesNotThrow(()=>timers[0]())
+})
+
+
+test('invalid legacy theme values do not prevent worker initialization', async () => {
+  for (const theme of [null, {}, [], false]) {
+    const w=worker(); w.start({theme})
+    const reply=await w.message({message:'popup'})
+    assert.equal(reply.theme,'lapis-fzyousongjs')
+  }
+})
+
+test('invalid origin regex does not throw out of the asynchronous detection callback', async () => {
+  const w=worker()
+  w.start({header:null,origins:{'file://':{header:true,path:true,match:'['}}})
+  await w.message({message:'popup'})
+  // A true browser injection callback runs after detect.tab has returned.
+  let detected
+  w.h.chrome.scripting.executeScript=(_,cb)=>{detected=cb}
+  w.events.tab(1,{status:'loading'},{})
+  await tick()
+  assert.doesNotThrow(()=>detected([{result:JSON.stringify({url:'file:///test.md',header:'text/plain',loaded:false})}]))
+  assert.equal(w.calls.filter(x=>x[0]==='css').length,0)
 })

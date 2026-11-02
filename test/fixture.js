@@ -11,7 +11,7 @@ window.addEventListener('load', async () => {
   await load('/vendor/markdown-it.min.js'); await load('/background/compilers/markdown-it.js')
   const compiler=md.compilers['markdown-it']({storage:{state:{'markdown-it':md.compilers['markdown-it'].defaults}}})
   window.chrome={runtime:{onMessage:{addListener: f => {window.deliver=f}},getURL:x=>x,sendMessage:(req,done)=>{
-    if (req.message === 'prism') {load('/vendor/prism/prism-'+req.language+'.min.js').then(done); return}
+    if (req.message === 'prism') {load('/vendor/prism/prism-'+req.language+'.min.js').then(() => done([]), () => done({error:'Language unavailable'})); return}
     setTimeout(()=>done(fixtureMode === 'error' ? {error:'Intentional test failure'} : {html:compiler.compile(req.markdown)}), fixtureMode==='slow'?700:150)
   }}}
   const scripts = ['/vendor/mithril.min.js','/vendor/prism.min.js','/vendor/prism-autoloader.min.js','/content/prism.js']

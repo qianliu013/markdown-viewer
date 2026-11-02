@@ -38,10 +38,13 @@ var scroll = (() => {
       container.scrollTop = parseInt(localStorage.getItem(key))
     }
     catch (err) {
-      chrome.storage.local.get(key, (res) => {
-        if (chrome.runtime.lastError) return
-        container.scrollTop = parseInt(res[key]) || 0
-      })
+      try {
+        chrome.storage.local.get(key, (res) => {
+          if (chrome.runtime.lastError || !res) return
+          container.scrollTop = parseInt(res[key]) || 0
+        })
+      }
+      catch (err) { /* An old tab can outlive its extension context. */ }
     }
   }
   function set (container, prefix) {
@@ -51,7 +54,13 @@ var scroll = (() => {
         localStorage.setItem(key, container.scrollTop)
       }
       catch (err) {
-        chrome.storage.local.set({[key]: container.scrollTop})
+        try {
+          chrome.storage.local.set({[key]: container.scrollTop}, () => {
+            // Consume an asynchronous error after extension reload as well.
+            void chrome.runtime.lastError
+          })
+        }
+        catch (err) { /* Scroll persistence is optional; keep reading usable. */ }
       }
     })
   }
