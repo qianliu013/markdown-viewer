@@ -32,8 +32,16 @@ importScripts('/background/icon.js')
 
   var messages = md.messages({storage, compilers, mathjax, xhr, webrequest, icon})
 
-  chrome.tabs.onUpdated.addListener(detect.tab)
-  chrome.runtime.onMessage.addListener(messages)
+  chrome.tabs.onUpdated.addListener((id, info, tab) => {
+    storage.ready.then(() => detect.tab(id, info, tab)).catch(console.error)
+  })
+  chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
+    storage.ready.then(() => messages(req, sender, sendResponse)).catch((err) => {
+      console.error(err)
+      sendResponse({error: err.message})
+    })
+    return true
+  })
 
-  icon()
+  storage.ready.then(icon).catch(console.error)
 })()

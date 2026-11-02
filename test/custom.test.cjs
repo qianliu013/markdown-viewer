@@ -29,6 +29,9 @@ test('embedded delimiter text, empty and metadata-only documents', () => {
   assert.equal(parse('---\nname: weekly\n---').body, '')
   assert.equal(parse('---\n---').metadata.source, '')
   assert.equal(parse('---\ntitle: |\n  multiline\n---').title, null)
+  const toml = '+++\ndescription = """\n...\n"""\n+++\nBody'
+  assert.equal(parse(toml).body, 'Body')
+  assert.equal(parse(toml).metadata.language, 'toml')
 })
 
 test('ordinary, misplaced, unclosed and mismatched content is not discarded', () => {
@@ -46,11 +49,11 @@ function harness(deferred = false) {
     chrome: {runtime: {onMessage: {addListener() {}}, getURL: x => x,
       sendMessage: (req, done) => {
         context.compiled = req.markdown
-        const respond = () => done({html: req.markdown ? '<h2 id="body">Body</h2>' : ''})
+        const respond = (result = {html: req.markdown ? '<h2 id="body">Body</h2>' : ''}) => done(result)
         if (deferred) context.respond = respond
         else respond()
       }}},
-    setInterval() {}, clearInterval() {}, parseFrontmatter: parse,
+    setInterval() {}, clearInterval() {}, setTimeout(fn) { context.timeout = fn }, clearTimeout() {}, parseFrontmatter: parse,
     favicon() {},
     m: Object.assign((selector, ...children) => ({selector, children}), {
       redraw() {}, trust: html => ({trusted: html}), mount: (_, component) => { context.component = component }
@@ -65,7 +68,7 @@ function harness(deferred = false) {
 test('wait for the asynchronous compiler before creating the reading container', () => {
   const h = harness(true)
   h.render('# Body')
-  assert.equal(h.component.view().length, 0)
+  assert.equal(h.component.view().selector, 'pre#_source')
   h.respond()
   assert.ok(h.component.view().some(x => x.selector === '#_html'))
 })
@@ -73,23 +76,47 @@ test('wait for the asynchronous compiler before creating the reading container',
 test('metadata-only documents render after their empty HTML response arrives', () => {
   const h = harness(true)
   h.render('---\nname: weekly\n---')
-  assert.equal(h.component.view().length, 0)
+  assert.equal(h.component.view().selector, 'pre#_source')
   h.respond()
   assert.ok(h.component.view().some(x => x.selector === '#_html'))
 })
 
-test('visibility helper is injected before index can mount on an already loaded page', () => {
+test('compiler errors and timeouts show readable original text, never an empty page', () => {
+  for (const mode of ['error', 'timeout', 'missing']) {
+    const h = harness(true)
+    h.render('# Original document')
+    if (mode === 'timeout') h.timeout()
+    else h.respond(mode === 'error' ? {error: 'Compiler failed'} : {})
+    assert.equal(h.state.raw, true)
+    const tree = h.component.view()
+    assert.ok(tree.some(x => x.selector === 'div#_render-error'))
+    assert.equal(tree.find(x => x.selector === 'pre#_markdown').children[1], '# Original document')
+  }
+})
+
+test('an earlier compiler response cannot replace a newer auto-reloaded document', () => {
+  const h = harness(true)
+  h.render('# Old')
+  const oldResponse = h.respond
+  h.render('# New')
+  h.respond({html: '<h1>New</h1>'})
+  oldResponse({html: '<h1>Old</h1>'})
+  assert.equal(h.state.html, '<h1>New</h1>')
+  assert.equal(h.state.markdown, '# New')
+})
+
+test('visibility helper is injected before index can mount on an already loaded page', async () => {
   let scripts
   const h = {
     md: {},
     chrome: {scripting: {
-      executeScript: options => { if (options.files) scripts = Array.from(options.files) },
+      executeScript: async options => { if (options.files) scripts = Array.from(options.files); return [{result: true}] },
       insertCSS() {},
     }},
   }
   vm.createContext(h)
   vm.runInContext(read('background/inject.js'), h)
-  h.md.inject({storage: {state: {content: {}, settings: {}}}})(1)
+  await h.md.inject({storage: {state: {content: {}, settings: {}}}})(1)
   assert.ok(scripts.indexOf('/content/scroll.js') < scripts.indexOf('/content/index.js'))
 })
 

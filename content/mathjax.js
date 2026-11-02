@@ -41,8 +41,8 @@ var mj = {
   loaded: false,
   render: () => {
     mj.loaded = false
-    MathJax.typesetPromise().then(() => {
-      setTimeout(() => mj.loaded = true, 20)
-    })
+    MathJax.typesetPromise().catch((err) => {
+      console.warn('MathJax rendering failed:', err)
+    }).finally(() => { mj.loaded = true })
   }
 }

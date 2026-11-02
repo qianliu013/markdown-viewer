@@ -13,26 +13,26 @@ md.storage = ({compilers}) => {
     Object.assign(state, options)
   }
 
-  chrome.storage.sync.get((res) => {
-    md.storage.bug(res)
-
-    Object.assign(state, JSON.parse(JSON.stringify(
-      !Object.keys(res).length ? defaults : res)))
-
-    // in case of new providers from the compilers branch
-    Object.keys(compilers).forEach((compiler) => {
-      if (!state[compiler]) {
-        state[compiler] = compilers[compiler].defaults
+  // Expose readiness so a cold service worker cannot handle tabs/messages
+  // against empty settings. Register listeners synchronously; await this inside.
+  var ready = new Promise((resolve, reject) => {
+    chrome.storage.sync.get((res) => {
+      try {
+        if (chrome.runtime.lastError) throw new Error(chrome.runtime.lastError.message)
+        Object.assign(state, JSON.parse(JSON.stringify(defaults)), res)
+        for (var key of ['content', 'settings', 'custom', ...Object.keys(compilers)]) {
+          state[key] = Object.assign({}, defaults[key], res[key])
+        }
+        if (!compilers[state.compiler]) state.compiler = defaults.compiler
+        md.storage.migrations(state)
+        // Persist migrations without racing subsequent user changes.
+        set(state).then(() => { md.storage.bug(state); resolve() }, reject)
       }
+      catch (err) { reject(err) }
     })
-
-    // mutate
-    md.storage.migrations(state)
-
-    set(state)
   })
 
-  return {defaults, state, set}
+  return {defaults, state, set, ready}
 }
 
 md.storage.defaults = (compilers) => {

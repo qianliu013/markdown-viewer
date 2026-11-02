@@ -1,7 +1,7 @@
 
 md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webrequest, icon}) => {
 
-  return (req, sender, sendResponse) => {
+  return async (req, sender, sendResponse) => {
 
     // content
     if (req.message === 'markdown') {
@@ -55,39 +55,39 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
       }))
     }
     else if (req.message === 'popup.theme') {
-      set({theme: req.theme})
+      await set({theme: req.theme})
       notifyContent({message: 'theme', theme: req.theme})
       sendResponse()
     }
     else if (req.message === 'popup.raw') {
-      set({raw: req.raw})
+      await set({raw: req.raw})
       notifyContent({message: 'raw', raw: req.raw})
       sendResponse()
     }
     else if (req.message === 'popup.themes') {
-      set({themes: req.themes})
+      await set({themes: req.themes})
       notifyContent({message: 'themes', themes: req.themes})
       sendResponse()
     }
     else if (req.message === 'popup.defaults') {
-      var options = Object.assign({}, defaults)
+      var options = JSON.parse(JSON.stringify(defaults))
       options.origins = state.origins
-      set(options)
+      await set(options)
       notifyContent({message: 'reload'})
       sendResponse()
     }
     else if (req.message === 'popup.compiler.name') {
-      set({compiler: req.compiler})
+      await set({compiler: req.compiler})
       notifyContent({message: 'reload'})
       sendResponse()
     }
     else if (req.message === 'popup.compiler.options') {
-      set({[req.compiler]: req.options})
+      await set({[req.compiler]: req.options})
       notifyContent({message: 'reload'})
       sendResponse()
     }
     else if (req.message === 'popup.content') {
-      set({content: req.content})
+      await set({content: req.content})
       notifyContent({message: 'reload'})
       webrequest()
       sendResponse()
@@ -119,18 +119,18 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
         path: true,
         match: defaults.match,
       }
-      set({origins: state.origins})
+      await set({origins: state.origins})
       sendResponse()
     }
     else if (req.message === 'origin.remove') {
       delete state.origins[req.origin]
-      set({origins: state.origins})
+      await set({origins: state.origins})
       webrequest()
       sendResponse()
     }
     else if (req.message === 'origin.update') {
       state.origins[req.origin] = req.options
-      set({origins: state.origins})
+      await set({origins: state.origins})
       webrequest()
       sendResponse()
     }
@@ -141,12 +141,12 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
     }
     // settings options
     else if (req.message === 'options.icon') {
-      set({settings: req.settings})
+      await set({settings: req.settings})
       icon()
       sendResponse()
     }
     else if (req.message === 'options.theme') {
-      set({settings: req.settings})
+      await set({settings: req.settings})
       sendResponse()
     }
     else if (req.message === 'custom.get') {
@@ -165,7 +165,12 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
 
   function notifyContent (req, res) {
     chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-      chrome.tabs.sendMessage(tabs[0].id, req, res)
+      if (!tabs[0]) return
+      chrome.tabs.sendMessage(tabs[0].id, req, (response) => {
+        // Active tab may be Settings or an ordinary page without our receiver.
+        if (chrome.runtime.lastError) return
+        if (res) res(response)
+      })
     })
   }
 }
