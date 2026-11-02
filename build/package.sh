@@ -34,6 +34,7 @@ sh panzoom/build.sh
 sh prism/build.sh
 sh remark/build.sh
 sh themes/build.sh $browser
+sh custom-themes.sh
 
 # copy files
 mkdir -p tmp

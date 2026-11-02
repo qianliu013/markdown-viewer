@@ -1,0 +1,460 @@
+/*
+ * Lapis — Markdown Viewer 自定义浅色主题
+ * 来源：https://github.com/YiNNx/typora-theme-lapis
+ * 内置主题：在 Content Theme 中选择；浅色模式。
+ * 本机需已安装 FZYouSongJS；代码使用等宽字体。
+ * 字体、字号、行高在下方 --lapis-font / --lapis-size / --lapis-leading 中调整。
+ * 默认外框宽 1000px，左右内边距各 40px；视口较小时自动收窄。
+ * Content Width 的 full / wide / large 等设置会覆盖默认宽度。
+ * 修改此文件后运行 sh build/custom-themes.sh，再刷新 Markdown 页面。
+ * 浏览器适配保留正文风格，未包含 Typora 专用界面；不依赖外部字体或样式。
+ */
+
+:root {
+  --lapis-font: "FZYouSongJS", "Songti SC", serif;
+  --lapis-size: 18px;
+  --lapis-leading: 1.8;
+  --lapis-text: #40464f;
+  --lapis-blue: #4870ac;
+  --lapis-marker: #a2b6d4;
+  --lapis-block: #f6f8fa;
+  --lapis-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+body._theme-lapis-fzyousongjs {
+  background:#fff;
+  color:var(--lapis-text);
+}
+
+/* 页面宽度和内边距：修改 width / padding 即可。 */
+#_html.markdown-theme {
+  box-sizing:border-box;
+  width:1000px!important;
+  min-width:0;
+  max-width:100%!important;
+  padding:36px 40px 72px!important;
+  margin:0 auto!important;
+  font-family:var(--lapis-font);
+  font-size:var(--lapis-size);
+  line-height:var(--lapis-leading);
+  color:var(--lapis-text);
+  overflow-wrap:anywhere;
+}
+
+/* 对应插件 Content Width；auto 时使用上面的默认宽度。 */
+#_html._width-full {
+  width:100%!important;
+}
+
+#_html._width-wide {
+  width:1400px!important;
+}
+
+#_html._width-large {
+  width:1200px!important;
+}
+
+#_html._width-medium {
+  width:992px!important;
+}
+
+#_html._width-small {
+  width:768px!important;
+}
+
+#_html._width-tiny {
+  width:576px!important;
+}
+
+/* 普通段落段后间距 12px；正文保持 18px、1.8 倍行高。 */
+#_html p {
+  margin:0 0 12px;
+}
+
+#_html>:first-child {
+  margin-top:0;
+}
+
+#_html strong {
+  color:var(--lapis-blue);
+  font-weight:700;
+}
+
+#_html a:not(.anchor) {
+  color:var(--lapis-blue);
+  text-decoration:underline;
+  text-underline-offset:4px;
+  text-decoration-thickness:1px;
+}
+
+#_html a:hover {
+  text-decoration-thickness:2px;
+}
+
+/* 标题间距采用固定像素，避免随标题字号放大；上疏下紧以保留层次。 */
+#_html :is(h1,h2,h3,h4,h5,h6) {
+  font-family:var(--lapis-font);
+  color:var(--lapis-blue);
+  font-weight:700;
+  line-height:1.3;
+  padding:0;
+  scroll-margin-top:24px;
+}
+
+#_html h1 {
+  text-align:center;
+  font-size:2em;
+  margin:24px 0;
+}
+
+/* 独占一行，色块仍随文字宽度；让相邻段落和标题的间距正常合并。 */
+#_html h2 {
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  box-sizing:border-box;
+  font-size:1.5em;
+  background:var(--lapis-blue);
+  color:#fff;
+  padding:2px 13px;
+  border-radius:4px;
+  margin:24px 0 10px;
+}
+
+#_html h2 :is(a,code,strong,em) {
+  color:inherit;
+}
+
+#_html h2 code {
+  background:transparent;
+}
+
+#_html h3 {
+  font-size:1.3em;
+  margin:18px 0 8px;
+}
+
+#_html h4 {
+  font-size:1.15em;
+  margin:16px 0 8px;
+}
+
+#_html h5 {
+  font-size:1.05em;
+  margin:14px 0 6px;
+  font-weight:400;
+}
+
+#_html h6 {
+  font-size:1em;
+  margin:12px 0 6px;
+  font-weight:400;
+}
+
+#_html .anchor {
+  text-decoration:none;
+}
+
+#_html h2 .anchor {
+  color:var(--lapis-blue);
+}
+
+#_html :is(ul,ol) {
+  margin:8px 0 12px;
+  padding-left:1.65em;
+}
+
+#_html li {
+  margin:4px 0;
+}
+
+#_html li::marker {
+  color:var(--lapis-marker);
+  font-weight:700;
+}
+
+#_html li>p {
+  margin:4px 0;
+}
+
+#_html li>:is(ul,ol) {
+  margin:4px 0;
+}
+
+/* 列表项末尾不再叠加段落或嵌套列表的留白。 */
+#_html li>:last-child {
+  margin-bottom:0;
+}
+
+#_html ul {
+  list-style-type:disc;
+}
+
+#_html ul ul {
+  list-style-type:square;
+}
+
+#_html blockquote {
+  border-left:3px solid var(--lapis-blue);
+  padding:12px 24px 12px 20px;
+  margin:12px 0;
+  background:var(--lapis-block);
+}
+
+#_html blockquote>:first-child {
+  margin-top:0;
+}
+
+#_html blockquote>:last-child {
+  margin-bottom:0;
+}
+
+#_html :is(code,kbd,samp,pre) {
+  font-family:var(--lapis-mono);
+}
+
+#_html :not(pre)>code {
+  color:var(--lapis-blue);
+  font-size:.88em;
+  padding:2px 5px;
+  border-radius:3px;
+  background:var(--lapis-block);
+  overflow-wrap:anywhere;
+}
+
+#_html pre {
+  margin:16px 0;
+  padding:16px 20px;
+  border-radius:10px;
+  background:var(--lapis-block);
+  color:#4f5467;
+  font-size:.85em;
+  line-height:1.65;
+  overflow:auto;
+  tab-size:2;
+}
+
+#_html pre>code {
+  display:block;
+  padding:0;
+  margin:0;
+  font-size:inherit;
+  line-height:inherit;
+  white-space:pre;
+  overflow-wrap:normal;
+  word-break:normal;
+  background:transparent;
+  color:inherit;
+  text-shadow:none;
+}
+
+#_html .token {
+  background:transparent;
+  text-shadow:none;
+}
+
+#_html :is(.token.comment,.token.prolog,.token.doctype) {
+  color:#888;
+}
+
+#_html .token.keyword {
+  color:#1694b6;
+}
+
+#_html :is(.token.operator,.token.url) {
+  color:#2f86d2;
+}
+
+#_html :is(.token.property,.token.tag,.token.builtin) {
+  color:#b9218e;
+}
+
+#_html :is(.token.boolean,.token.class-name,.token.constant) {
+  color:#378ed8;
+}
+
+#_html .token.number {
+  color:#1a5494;
+}
+
+#_html .token.function {
+  color:#0744ac;
+}
+
+#_html :is(.token.string,.token.char) {
+  color:#6f42c2;
+}
+
+#_html :is(.token.attr-name,.token.regex) {
+  color:#8f6aa8;
+}
+
+#_html pre:has(>code.mermaid) {
+  background:transparent;
+}
+
+#_html img {
+  max-width:100%;
+  height:auto;
+  box-sizing:border-box;
+}
+
+#_html p>img:only-child {
+  display:block;
+  margin:1em auto;
+  filter:drop-shadow(0 6px 6px #e3e8f0);
+}
+
+#_html table {
+  display:block;
+  width:max-content;
+  max-width:100%;
+  margin:1em 0 1.3em;
+  overflow-x:auto;
+  border-collapse:collapse;
+  border-spacing:0;
+  font-size:.94em;
+}
+
+#_html :is(th,td) {
+  border:1px solid #d9dfe4;
+  padding:8px 14px;
+}
+
+#_html th {
+  color:var(--lapis-blue);
+  font-weight:700;
+  background:var(--lapis-block);
+}
+
+#_html td:hover {
+  background:var(--lapis-block);
+}
+
+#_html hr {
+  border:0;
+  border-top:2px solid #eef2f5;
+  margin:24px 0;
+}
+
+#_html mark {
+  background:#ffffb5c2;
+  color:inherit;
+  padding:1px .15em;
+}
+
+#_html kbd {
+  border:1px solid #d9dfe4;
+  border-radius:3px;
+  padding:1px 5px;
+  font-size:.85em;
+}
+
+#_html .task-list-item {
+  list-style-type:none;
+}
+
+#_html input[type=checkbox] {
+  accent-color:var(--lapis-blue);
+  margin-right:.45em;
+}
+
+#_html .footnotes {
+  border-top:1px solid #d9dfe4;
+  font-size:.85em;
+  margin-top:2em;
+}
+
+#_html dl dt {
+  color:var(--lapis-blue);
+  font-weight:700;
+}
+
+#_html dl dd {
+  margin:.4em 0 1em 1.5em;
+}
+
+#_toc {
+  background:#fff;
+  font-family:var(--lapis-font);
+  font-size:16px;
+  line-height:1.65;
+}
+
+#_toc a {
+  color:var(--lapis-blue);
+  text-decoration:none;
+  border-radius:4px;
+}
+
+#_toc a:hover {
+  background:var(--lapis-block);
+}
+
+@media (max-width:600px) {
+  #_html.markdown-theme {
+    padding:20px 22px 40px!important;
+  }
+  #_html h1 {
+    font-size:1.7em;
+  }
+  #_html pre {
+    padding:16px;
+  }
+}
+
+@media print {
+  #_html.markdown-theme {
+    width:100%!important;
+    padding:0!important;
+    color:#000;
+  }
+  #_html h2 {
+    background:transparent;
+    color:var(--lapis-blue);
+    border-bottom:2px solid;
+  }
+  #_html :is(h1,h2,h3,h4,h5,h6) {
+    break-after:avoid;
+  }
+  #_html pre {
+    white-space:pre-wrap;
+  }
+  #_html pre>code {
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+  }
+  #_toc {
+    display:none;
+  }
+}
+
+/* 表头不拆字，避免“对象”等短标签被长内容列挤成竖排。
+ * 正文单元格正常换行；列过多时沿用表格的横向滚动。 */
+#_html table th {
+  white-space:nowrap;
+}
+
+/*
+MIT License
+
+Copyright (c) 2024 YiNN
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/

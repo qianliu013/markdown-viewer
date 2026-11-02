@@ -39,7 +39,7 @@ md.storage.defaults = (compilers) => {
   var match = '\\.(?:markdown|mdown|mkdn|md|mkd|mdwn|mdtxt|mdtext|text)(?:#.*|\\?.*)?$'
 
   var defaults = {
-    theme: 'github',
+    theme: 'lapis-fzyousongjs',
     compiler: 'markdown-it',
     raw: false,
     match,
@@ -52,6 +52,7 @@ md.storage.defaults = (compilers) => {
       mathjax: false,
       mermaid: false,
       syntax: true,
+      frontmatter: true,
       toc: false,
     },
     origins: {
@@ -193,4 +194,12 @@ md.storage.migrations = (state) => {
       color: 'auto'
     }
   }
+  // Custom edition: migrate hidden selections and preserve an explicit opt-out.
+  if (!['lapis-fzyousongjs', 'github-fzyousongjs', 'purple-black-fzyousongjs', 'phycat-sky-fzyousongjs'].includes(state.theme)) {
+    state.theme = 'lapis-fzyousongjs'
+  }
+  if (state.content.frontmatter === undefined) {
+    state.content.frontmatter = true
+  }
+
 }

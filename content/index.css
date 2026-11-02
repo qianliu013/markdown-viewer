@@ -11,6 +11,40 @@ details summary {
   cursor: pointer;
 }
 
+/* Metadata shares the reading column; override theme-specific code decorations. */
+#_html.markdown-theme > details._frontmatter {
+  margin: 0 0 20px;
+  padding: 10px 14px;
+  border: 1px solid #d8e0ea;
+  border-radius: 6px;
+  background: #f6f8fa;
+  color: #40464f;
+  font-size: 15px;
+  line-height: 1.5;
+}
+#_html.markdown-theme > details._frontmatter > summary {
+  display: list-item;
+  font: inherit;
+  font-weight: 600;
+}
+#_html.markdown-theme > details._frontmatter > pre {
+  margin: 10px 0 0;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  font-size: 14px;
+}
+#_html.markdown-theme > details._frontmatter > pre::before,
+#_html.markdown-theme > details._frontmatter > pre::after {
+  content: none;
+}
+#_html.markdown-theme > details._frontmatter > pre > code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
 #_html, #_toc {
   word-wrap: break-word;
   visibility: hidden;

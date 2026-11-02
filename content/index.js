@@ -11,6 +11,8 @@ var state = {
   icon: args.icon,
   html: '',
   markdown: '',
+  frontmatter: null,
+  frontmatterOpen: true,
   toc: '',
   reload: {
     interval: null,
@@ -18,6 +20,11 @@ var state = {
     md: false,
   },
   _themes: {
+    'lapis-fzyousongjs': 'light',
+    'github-fzyousongjs': 'light',
+    'purple-black-fzyousongjs': 'light',
+    'phycat-sky-fzyousongjs': 'light',
+
     'github': 'light',
     'github-dark': 'dark',
     'almond': 'light',
@@ -114,10 +121,13 @@ var update = (update) => {
 
 var render = (md) => {
   state.markdown = md
+  var parsed = parseFrontmatter(md)
+  state.frontmatter = parsed.metadata
+  if (parsed.title) document.title = parsed.title
   chrome.runtime.sendMessage({
     message: 'markdown',
     compiler: state.compiler,
-    markdown: frontmatter(state.markdown)
+    markdown: parsed.body
   }, (res) => {
     state.html = res.html
     if (state.content.emoji) {
@@ -149,7 +159,7 @@ function mount () {
     view: () => {
       var dom = []
 
-      if (state.html) {
+      if (state.html || state.frontmatter || state.markdown) {
         state._themes.custom = state.custom.color
 
         var color =
@@ -173,7 +183,7 @@ function mount () {
         }
 
         var theme =
-          (/github(-dark)?/.test(state.theme) ? 'markdown-body' : 'markdown-theme') +
+          (/^github(-dark)?$/.test(state.theme) ? 'markdown-body' : 'markdown-theme') +
           (state.themes.width !== 'auto' ? ` _width-${state.themes.width}` : '')
 
         if (state.raw) {
@@ -188,6 +198,15 @@ function mount () {
         }
         else {
           dom.push(m('#_html', {oncreate: oncreate.html, onupdate: onupdate.html, class: theme},
+            state.content.frontmatter && state.frontmatter &&
+            m('details._frontmatter', {
+              open: state.frontmatterOpen,
+              ontoggle: (e) => { state.frontmatterOpen = e.target.open }
+            },
+              m('summary', '文档元数据 · ' + state.frontmatter.language.toUpperCase()),
+              // Pass text to Mithril, never HTML: metadata is untrusted document content.
+              m('pre', m('code.language-' + state.frontmatter.language, state.frontmatter.source))
+            ),
             m.trust(state.html)
           ))
         }
@@ -232,20 +251,6 @@ var toc = (() => {
       , '')
   }
 })()
-
-var frontmatter = (md) => {
-  if (/^-{3}[\s\S]+?-{3}/.test(md)) {
-    var [, yaml] = /^-{3}([\s\S]+?)-{3}/.exec(md)
-    var title = /title: (?:'|")*(.*)(?:'|")*/.exec(yaml)
-    title && (document.title = title[1])
-  }
-  else if (/^\+{3}[\s\S]+?\+{3}/.test(md)) {
-    var [, toml] = /^\+{3}([\s\S]+?)\+{3}/.exec(md)
-    var title = /title = (?:'|"|`)*(.*)(?:'|"|`)*/.exec(toml)
-    title && (document.title = title[1])
-  }
-  return md.replace(/^(?:-|\+){3}[\s\S]+?(?:-|\+){3}/, '')
-}
 
 var favicon = () => {
   var favicon = document.createElement('link')
