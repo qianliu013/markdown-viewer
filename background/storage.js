@@ -79,15 +79,22 @@ md.storage.defaults = (compilers) => {
   return defaults
 }
 
-md.storage.bug = (res) => {
-  // reload extension bug
-  chrome.permissions.getAll((permissions) => {
+md.storage.bug = async (res) => {
+  // Clean up stale optional hosts after reload, never manifest-required hosts.
+  // On a fresh install storage is empty, but file:///* is already granted.
+  try {
+    var permissions = await chrome.permissions.getAll()
+    var required = chrome.runtime.getManifest().host_permissions || []
     var origins = Object.keys(res.origins || {})
-    chrome.permissions.remove({
-      origins: permissions.origins
-        .filter((origin) => origins.indexOf(origin.slice(0, -2)) === -1)
-    })
-  })
+    var stale = permissions.origins.filter((origin) =>
+      !required.includes(origin) && !origins.includes(origin.slice(0, -2)))
+    if (stale.length) {
+      await chrome.permissions.remove({origins: stale})
+    }
+  }
+  catch (err) {
+    console.warn('Could not clean up stale optional host permissions:', err)
+  }
 }
 
 md.storage.migrations = (state) => {

@@ -18,7 +18,7 @@
 
 ```sh
 sh build/prepare-custom.sh
-node --test test/custom.test.cjs
+node --test test/*.test.cjs
 ```
 
 准备脚本下载官方 5.3 发布包并校验固定 SHA-256，仅复用其中的 vendor 依赖和原主题。
@@ -48,7 +48,7 @@ git merge --ff-only upstream/main
 git push origin main
 git switch custom
 git merge main
-node --test test/custom.test.cjs
+node --test test/*.test.cjs
 ```
 
 准备脚本固定使用 5.3 依赖；同步上游如果涉及依赖更新，需一并评估发布包版本、校验值和构建脚本，不能只合并代码。
