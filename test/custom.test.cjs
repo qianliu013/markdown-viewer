@@ -38,13 +38,18 @@ test('ordinary, misplaced, unclosed and mismatched content is not discarded', ()
   }
 })
 
-function harness() {
+function harness(deferred = false) {
   const body = {style: {}, innerText: '', classList: {remove() {}, add() {}, [Symbol.iterator]: function* () {}}}
   const context = {
     args: {theme: 'lapis-fzyousongjs', content: {frontmatter: true}, themes: {width: 'auto'}, custom: {}},
     document: {readyState: 'loading', querySelector: () => body, title: ''},
     chrome: {runtime: {onMessage: {addListener() {}}, getURL: x => x,
-      sendMessage: (req, done) => { context.compiled = req.markdown; done({html: req.markdown ? '<h2 id="body">Body</h2>' : ''}) }}},
+      sendMessage: (req, done) => {
+        context.compiled = req.markdown
+        const respond = () => done({html: req.markdown ? '<h2 id="body">Body</h2>' : ''})
+        if (deferred) context.respond = respond
+        else respond()
+      }}},
     setInterval() {}, clearInterval() {}, parseFrontmatter: parse,
     favicon() {},
     m: Object.assign((selector, ...children) => ({selector, children}), {
@@ -56,6 +61,37 @@ function harness() {
   vm.runInContext('favicon = () => {}; mount()', context)
   return context
 }
+
+test('wait for the asynchronous compiler before creating the reading container', () => {
+  const h = harness(true)
+  h.render('# Body')
+  assert.equal(h.component.view().length, 0)
+  h.respond()
+  assert.ok(h.component.view().some(x => x.selector === '#_html'))
+})
+
+test('metadata-only documents render after their empty HTML response arrives', () => {
+  const h = harness(true)
+  h.render('---\nname: weekly\n---')
+  assert.equal(h.component.view().length, 0)
+  h.respond()
+  assert.ok(h.component.view().some(x => x.selector === '#_html'))
+})
+
+test('visibility helper is injected before index can mount on an already loaded page', () => {
+  let scripts
+  const h = {
+    md: {},
+    chrome: {scripting: {
+      executeScript: options => { if (options.files) scripts = Array.from(options.files) },
+      insertCSS() {},
+    }},
+  }
+  vm.createContext(h)
+  vm.runInContext(read('background/inject.js'), h)
+  h.md.inject({storage: {state: {content: {}, settings: {}}}})(1)
+  assert.ok(scripts.indexOf('/content/scroll.js') < scripts.indexOf('/content/index.js'))
+})
 
 test('metadata bypasses compiler, renders as safe text, toggles and preserves Raw', () => {
   const h = harness()

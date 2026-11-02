@@ -10,6 +10,7 @@ var state = {
   custom: args.custom,
   icon: args.icon,
   html: '',
+  ready: false,
   markdown: '',
   frontmatter: null,
   frontmatterOpen: true,
@@ -130,6 +131,7 @@ var render = (md) => {
     markdown: parsed.body
   }, (res) => {
     state.html = res.html
+    state.ready = true
     if (state.content.emoji) {
       state.html = emojinator(state.html)
     }
@@ -159,7 +161,10 @@ function mount () {
     view: () => {
       var dom = []
 
-      if (state.html || state.frontmatter || state.markdown) {
+      // The compiler reply is asynchronous. Creating #_html before it arrives
+      // runs oncreate too early and can leave the content permanently hidden.
+      // An explicit ready flag also permits a metadata-only / empty document.
+      if (state.ready) {
         state._themes.custom = state.custom.color
 
         var color =
