@@ -1,0 +1,55 @@
+# Markdown Viewer 定制版
+
+基于 simov/markdown-viewer 5.3。`main` 跟踪上游，定制内容维护在 `custom` 分支。
+
+## 阅读体验
+
+- 主题菜单仅显示 Lapis、GitHub、Purple 黑色、Phycat 天蓝四套 FZYouSongJS 版本，默认 Lapis。
+- 原主题构建脚本和资源保留，但入口隐藏。旧主题选择迁移为 Lapis。
+- 字体使用本机安装的 FZYouSongJS，缺失时回退到 Songti SC / serif；不分发字体文件。
+- 默认外框 1000px，正文 18px、1.8 倍行高。Content Width 选择 auto 使用该宽度。
+- YAML/TOML front matter 默认显示在正文顶部，可点击折叠；在 Content 中关闭 frontmatter 可隐藏。
+- 元数据原文作为代码展示，不执行 HTML，不修改 Markdown 源文件。Raw 视图保留完整原文。
+- 折叠状态在当前页面切换主题或源码时保留，刷新后默认展开。
+
+## 本地安装（Chrome）
+
+在仓库根目录执行：
+
+```sh
+sh build/prepare-custom.sh
+node --test test/custom.test.cjs
+```
+
+准备脚本下载官方 5.3 发布包并校验固定 SHA-256，仅复用其中的 vendor 依赖和原主题。
+本仓库中的 background、content、popup、options 代码和四套定制主题作为实际运行版本。
+该路径无需重新编译上游旧版 Sass 等依赖；也可传入已有官方 zip 的绝对路径离线准备。
+若需要从源码重建全部依赖，保留上游命令 `sh build/package.sh chrome`，完成后也会复制定制主题。
+
+1. 在 Chrome 扩展管理页面开启开发者模式，选择“加载已解压的扩展程序”。
+2. 选择本仓库根目录（生成的 manifest.json 在这里）。
+3. 在“Markdown Viewer Custom”的详情页开启“允许访问文件网址”。
+4. 停用原版 Markdown Viewer，避免同时处理同一个文件；刷新 Markdown 页面。
+
+定制版使用独立扩展身份，不会自动继承商店版的网站权限。远程文件如有需要，在 Origins 中单独授权。
+无需上传 CSS。正式安装在用户 Chrome 中的操作需要手动完成。
+
+## 修改与同步
+
+- 四套可编辑样式位于 `custom-themes/`，保留了原主题来源和许可证。`themes/` 是生成目录。
+- 修改主题后执行 `sh build/custom-themes.sh`，再刷新 Markdown 页面。
+- 修改插件 JavaScript 后，在 Chrome 扩展管理页面点击重新加载，再刷新文档。
+- `vendor/`、`themes/`、`manifest.json` 不提交；在新机器上运行准备脚本即可生成。
+
+```sh
+git fetch upstream
+git switch main
+git merge --ff-only upstream/main
+git push origin main
+git switch custom
+git merge main
+node --test test/custom.test.cjs
+```
+
+准备脚本固定使用 5.3 依赖；同步上游如果涉及依赖更新，需一并评估发布包版本、校验值和构建脚本，不能只合并代码。
+定制版不会从 Chrome 商店自动升级。

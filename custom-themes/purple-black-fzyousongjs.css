@@ -1,0 +1,442 @@
+/*
+ * Purple Plain 黑色 — Markdown Viewer 自定义浅色主题
+ * 来源：https://github.com/hliu202/typora-purple-theme
+ * 内置主题：在 Content Theme 中选择；浅色模式。
+ * 本机需已安装 FZYouSongJS；代码使用等宽字体。
+ * 字体、字号、行高在下方 --reader-font / --reader-size / --reader-leading 中调整。
+ * 默认外框宽 1000px，左右内边距各 40px；视口较小时自动收窄。
+ * Content Width 的 full / wide / large 等设置会覆盖默认宽度。
+ * 修改此文件后运行 sh build/custom-themes.sh，再刷新 Markdown 页面。
+ * 浏览器适配保留正文风格，未包含 Typora 专用界面；不依赖外部字体或样式。
+ */
+
+:root {
+  --reader-font: "FZYouSongJS", "Songti SC", serif;
+  --reader-size: 18px;
+  --reader-leading: 1.8;
+  --reader-mono: "Cascadia Code", "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+body._theme-purple-black-fzyousongjs {
+  background:#fff;
+  color:var(--ink);
+}
+
+/* 页面宽度和内边距：修改 width / padding 即可。 */
+#_html.markdown-theme {
+  box-sizing:border-box;
+  width:1000px!important;
+  min-width:0;
+  max-width:100%!important;
+  padding:36px 40px 72px!important;
+  margin:0 auto!important;
+  font-family:var(--reader-font);
+  font-size:var(--reader-size);
+  line-height:var(--reader-leading);
+  color:var(--ink);
+  overflow-wrap:anywhere;
+}
+
+/* 对应插件 Content Width；auto 时使用上面的默认宽度。 */
+#_html._width-full {
+  width:100%!important;
+}
+
+#_html._width-wide {
+  width:1400px!important;
+}
+
+#_html._width-large {
+  width:1200px!important;
+}
+
+#_html._width-medium {
+  width:992px!important;
+}
+
+#_html._width-small {
+  width:768px!important;
+}
+
+#_html._width-tiny {
+  width:576px!important;
+}
+
+/* 普通段落段后间距 12px；正文保持 18px、1.8 倍行高。 */
+#_html p {
+  margin:0 0 12px;
+}
+
+#_html>:first-child {
+  margin-top:0;
+}
+
+/* 标题间距采用固定像素，避免随标题字号放大；上疏下紧以保留层次。 */
+#_html :is(h1,h2,h3,h4,h5,h6) {
+  font-family:var(--reader-font);
+  font-weight:700;
+  line-height:1.3;
+  scroll-margin-top:24px;
+  position:relative;
+  color:var(--accent);
+}
+
+#_html h1 {
+  font-size:2em;
+  text-align:center;
+  margin:24px 0;
+}
+
+#_html h2 {
+  font-size:1.5em;
+  margin:24px 0 10px;
+}
+
+#_html h3 {
+  font-size:1.3em;
+  margin:18px 0 8px;
+}
+
+#_html h4 {
+  font-size:1.15em;
+  margin:16px 0 8px;
+}
+
+#_html h5 {
+  font-size:1.05em;
+  margin:14px 0 6px;
+}
+
+#_html h6 {
+  font-size:1em;
+  margin:12px 0 6px;
+}
+
+#_html strong {
+  font-weight:700;
+  color:var(--accent);
+}
+
+#_html a:not(.anchor) {
+  color:var(--link);
+  text-decoration:underline;
+  text-underline-offset:4px;
+  text-decoration-thickness:1px;
+}
+
+#_html .anchor {
+  text-decoration:none;
+}
+
+#_html h2 .anchor {
+  color:var(--accent);
+}
+
+#_html :is(ul,ol) {
+  margin:8px 0 12px;
+  padding-left:1.7em;
+}
+
+#_html li {
+  margin:4px 0;
+}
+
+#_html li::marker {
+  color:var(--accent);
+}
+
+#_html li>p {
+  margin:4px 0;
+}
+
+#_html li>:is(ul,ol) {
+  margin:4px 0;
+}
+
+/* 列表项末尾不再叠加段落或嵌套列表的留白。 */
+#_html li>:last-child {
+  margin-bottom:0;
+}
+
+#_html blockquote {
+  margin:12px 0;
+  padding:12px 22px;
+}
+
+#_html blockquote>:first-child {
+  margin-top:0;
+}
+
+#_html blockquote>:last-child {
+  margin-bottom:0;
+}
+
+#_html :is(code,kbd,samp,pre) {
+  font-family:var(--reader-mono);
+}
+
+#_html :not(pre)>code {
+  font-size:.88em;
+  padding:2px 5px;
+  border-radius:4px;
+  background:var(--inline-bg);
+  color:var(--inline-ink);
+  overflow-wrap:anywhere;
+}
+
+#_html :is(h1,h2,h3,h4,h5,h6) code {
+  font-size:inherit;
+}
+
+#_html pre {
+  margin:16px 0;
+  padding:16px 20px;
+  border-radius:6px;
+  border:1px solid var(--edge);
+  background:#f8f8f8;
+  color:#444;
+  font-size:.85em;
+  line-height:1.65;
+  overflow:auto;
+  tab-size:2;
+}
+
+#_html pre>code {
+  display:block;
+  padding:0;
+  margin:0;
+  font-size:inherit;
+  line-height:inherit;
+  white-space:pre;
+  overflow-wrap:normal;
+  word-break:normal;
+  background:transparent;
+  color:inherit;
+  text-shadow:none;
+}
+
+#_html .token {
+  background:transparent;
+  text-shadow:none;
+}
+
+#_html .token.comment {
+  color:#888;
+}
+
+#_html .token.keyword {
+  color:#075c98;
+}
+
+#_html .token.string {
+  color:#7356a4;
+}
+
+#_html .token.number {
+  color:#98601d;
+}
+
+#_html .token.function {
+  color:#28626c;
+}
+
+#_html pre:has(>code.mermaid) {
+  background:transparent;
+  border:0;
+}
+
+#_html img {
+  max-width:100%;
+  height:auto;
+  box-sizing:border-box;
+}
+
+#_html p>img:only-child {
+  display:block;
+  margin:1em auto;
+}
+
+#_html table {
+  display:block;
+  width:max-content;
+  max-width:100%;
+  overflow:auto;
+  border-collapse:collapse;
+  border-spacing:0;
+  margin:1em 0 1.3em;
+  font-size:.94em;
+}
+
+#_html :is(th,td) {
+  border:1px solid var(--edge);
+  padding:8px 14px;
+}
+
+#_html th {
+  font-weight:700;
+  background:var(--soft);
+}
+
+#_html tr:nth-child(2n) {
+  background:var(--soft);
+}
+
+#_html hr {
+  border:0;
+  border-top:1px solid var(--edge);
+  margin:28px 0;
+}
+
+#_html mark {
+  background:#ffffc4;
+  color:inherit;
+  padding:1px .15em;
+}
+
+#_html kbd {
+  border:1px solid var(--edge);
+  border-radius:4px;
+  padding:1px 5px;
+  font-size:.85em;
+}
+
+#_html .task-list-item {
+  list-style-type:none;
+}
+
+#_html input[type=checkbox] {
+  accent-color:var(--accent);
+  margin-right:.45em;
+}
+
+#_html .footnotes {
+  border-top:1px solid var(--edge);
+  font-size:.85em;
+  margin-top:2em;
+}
+
+#_html dt {
+  font-weight:700;
+}
+
+#_html dd {
+  margin:.4em 0 1em 1.5em;
+}
+
+#_toc {
+  background:#fff;
+  font-family:var(--reader-font);
+  font-size:16px;
+  line-height:1.65;
+}
+
+#_toc a {
+  color:var(--link);
+  text-decoration:none;
+  border-radius:4px;
+}
+
+#_toc a:hover {
+  background:var(--soft);
+}
+
+@media (max-width:600px) {
+  #_html.markdown-theme {
+    padding:20px 22px 40px!important;
+  }
+  #_html h1 {
+    font-size:1.7em;
+  }
+  #_html pre {
+    padding:16px;
+  }
+}
+
+@media print {
+  #_html.markdown-theme {
+    width:100%!important;
+    padding:0!important;
+    color:#000;
+  }
+  #_html :is(h1,h2,h3,h4,h5,h6) {
+    break-after:avoid;
+  }
+  #_html pre>code {
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+  }
+  #_toc {
+    display:none;
+  }
+}
+
+:root {
+  --ink:#444;
+  --accent:#444;
+  --link:#666;
+  --inline-ink:#444;
+  --inline-bg:#f3f4f4;
+  --edge:#ddd;
+  --soft:#fcfcfc;
+}
+
+#_html h1::after {
+  content:"";
+  display:block;
+  margin:.2em auto 0;
+  width:6rem;
+  height:2px;
+  border-bottom:2px solid var(--accent);
+}
+
+#_html h2 {
+  padding-left:.4em;
+  border-left:.4em solid var(--accent);
+  border-bottom:1px solid var(--accent);
+}
+
+#_html blockquote {
+  border-left:.3rem solid #c8c8c8;
+  background:transparent;
+  color:#666;
+}
+
+#_html pre {
+  background:#fdfdfd;
+  border-color:#e7e7e7;
+  border-radius:5px;
+}
+
+#_html img[alt|="shadow"] {
+  box-shadow:3px 3px 10px #eee;
+}
+
+/* 表头不拆字，避免“对象”等短标签被长内容列挤成竖排。
+ * 正文单元格正常换行；列过多时沿用表格的横向滚动。 */
+#_html table th {
+  white-space:nowrap;
+}
+
+/*
+MIT License
+
+Copyright (c) 2020 Hao Liu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/

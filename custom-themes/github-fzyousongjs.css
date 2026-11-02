@@ -1,0 +1,646 @@
+/*
+ * GitHub — Markdown Viewer 自定义浅色主题
+ * 来源：https://github.com/sindresorhus/github-markdown-css
+ * 内置主题：在 Content Theme 中选择；浅色模式。
+ * 本机需已安装 FZYouSongJS；代码使用等宽字体。
+ * 字体、字号、行高在文件后部的 #_html 规则中调整。
+ * 默认外框宽 1000px，左右内边距各 40px；视口较小时自动收窄。
+ * Content Width 的 full / wide / large 等设置会覆盖默认宽度。
+ * 修改此文件后运行 sh build/custom-themes.sh，再刷新 Markdown 页面。
+ * 浏览器适配保留正文风格，未包含 Typora 专用界面；不依赖外部字体或样式。
+ */
+
+#_html {
+  -ms-text-size-adjust:100%;
+  -webkit-text-size-adjust:100%;
+  margin:0;
+  color:#1F2328;
+  background-color:#ffffff;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  font-size:16px;
+  line-height:1.5;
+  word-wrap:break-word;
+}
+
+#_html details,#_html figcaption,#_html figure {
+  display:block;
+}
+
+#_html summary {
+  display:list-item;
+}
+
+#_html [hidden] {
+  display:none!important;
+}
+
+#_html a {
+  background-color:transparent;
+  color:#0969da;
+  text-decoration:none;
+}
+
+#_html abbr[title] {
+  border-bottom:none;
+  -webkit-text-decoration:underline dotted;
+  text-decoration:underline dotted;
+}
+
+#_html b,#_html strong {
+  font-weight:600;
+}
+
+#_html dfn {
+  font-style:italic;
+}
+
+#_html h1 {
+  margin:.67em 0;
+  font-weight:600;
+  padding-bottom:.3em;
+  font-size:2em;
+  border-bottom:1px solid hsla(210,18%,87%,1);
+}
+
+#_html mark {
+  background-color:#fff8c5;
+  color:#1F2328;
+}
+
+#_html small {
+  font-size:90%;
+}
+
+#_html sub,#_html sup {
+  font-size:75%;
+  line-height:0;
+  position:relative;
+  vertical-align:baseline;
+}
+
+#_html sub {
+  bottom:-0.25em;
+}
+
+#_html sup {
+  top:-0.5em;
+}
+
+#_html img {
+  border-style:none;
+  max-width:100%;
+  box-sizing:content-box;
+  background-color:#ffffff;
+}
+
+#_html code,#_html kbd,#_html pre,#_html samp {
+  font-family:monospace;
+  font-size:1em;
+}
+
+#_html figure {
+  margin:1em 40px;
+}
+
+#_html hr {
+  box-sizing:content-box;
+  overflow:hidden;
+  background:transparent;
+  border-bottom:1px solid hsla(210,18%,87%,1);
+  height:.25em;
+  padding:0;
+  margin:24px 0;
+  background-color:#d0d7de;
+  border:0;
+}
+
+#_html input {
+  font:inherit;
+  margin:0;
+  overflow:visible;
+  font-family:inherit;
+  font-size:inherit;
+  line-height:inherit;
+}
+
+#_html [type=checkbox],#_html [type=radio] {
+  box-sizing:border-box;
+  padding:0;
+}
+
+#_html a:hover {
+  text-decoration:underline;
+}
+
+#_html hr::before {
+  display:table;
+  content:"";
+}
+
+#_html hr::after {
+  display:table;
+  clear:both;
+  content:"";
+}
+
+#_html table {
+  border-spacing:0;
+  border-collapse:collapse;
+  display:block;
+  width:max-content;
+  max-width:100%;
+  overflow:auto;
+}
+
+#_html td,#_html th {
+  padding:0;
+}
+
+#_html details summary {
+  cursor:pointer;
+}
+
+#_html details:not([open])>*:not(summary) {
+  display:none!important;
+}
+
+#_html kbd {
+  display:inline-block;
+  padding:3px 5px;
+  font:11px ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+  line-height:10px;
+  color:#1F2328;
+  vertical-align:middle;
+  background-color:#f6f8fa;
+  border:solid 1px rgba(175,184,193,0.2);
+  border-bottom-color:rgba(175,184,193,0.2);
+  border-radius:6px;
+  box-shadow:inset 0-1px 0 rgba(175,184,193,0.2);
+}
+
+#_html h1,#_html h2,#_html h3,#_html h4,#_html h5,#_html h6 {
+  margin-top:24px;
+  margin-bottom:16px;
+  font-weight:600;
+  line-height:1.25;
+}
+
+#_html h2 {
+  font-weight:600;
+  padding-bottom:.3em;
+  font-size:1.5em;
+  border-bottom:1px solid hsla(210,18%,87%,1);
+}
+
+#_html h3 {
+  font-weight:600;
+  font-size:1.25em;
+}
+
+#_html h4 {
+  font-weight:600;
+  font-size:1em;
+}
+
+#_html h5 {
+  font-weight:600;
+  font-size:.875em;
+}
+
+#_html h6 {
+  font-weight:600;
+  font-size:.85em;
+  color:#656d76;
+}
+
+/* 普通段落段后间距 12px；保留正文 18px、1.8 倍行高和各主题标题间距。 */
+#_html p {
+  margin:0 0 12px;
+}
+
+#_html blockquote {
+  margin:0;
+  padding:0 1em;
+  color:#656d76;
+  border-left:.25em solid #d0d7de;
+}
+
+#_html ul,#_html ol {
+  margin-top:0;
+  margin-bottom:0;
+  padding-left:2em;
+}
+
+#_html ol ol,#_html ul ol {
+  list-style-type:lower-roman;
+}
+
+#_html ul ul ol,#_html ul ol ol,#_html ol ul ol,#_html ol ol ol {
+  list-style-type:lower-alpha;
+}
+
+#_html dd {
+  margin-left:0;
+}
+
+#_html tt,#_html code,#_html samp {
+  font-family:ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+  font-size:12px;
+}
+
+#_html pre {
+  margin-top:0;
+  margin-bottom:0;
+  font-family:ui-monospace,SFMono-Regular,SF Mono,Menlo,Consolas,Liberation Mono,monospace;
+  font-size:12px;
+  word-wrap:normal;
+}
+
+#_html::before {
+  display:table;
+  content:"";
+}
+
+#_html::after {
+  display:table;
+  clear:both;
+  content:"";
+}
+
+#_html>*:first-child {
+  margin-top:0!important;
+}
+
+#_html>*:last-child {
+  margin-bottom:0!important;
+}
+
+#_html a:not([href]) {
+  color:inherit;
+  text-decoration:none;
+}
+
+#_html .absent {
+  color:#d1242f;
+}
+
+#_html blockquote,#_html ul,#_html ol,#_html dl,#_html table,#_html pre,#_html details {
+  margin-top:0;
+  margin-bottom:16px;
+}
+
+#_html blockquote>:first-child {
+  margin-top:0;
+}
+
+#_html blockquote>:last-child {
+  margin-bottom:0;
+}
+
+#_html h1 tt,#_html h1 code,#_html h2 tt,#_html h2 code,#_html h3 tt,#_html h3 code,#_html h4 tt,#_html h4 code,#_html h5 tt,#_html h5 code,#_html h6 tt,#_html h6 code {
+  padding:0 .2em;
+  font-size:inherit;
+}
+
+#_html summary h1,#_html summary h2,#_html summary h3,#_html summary h4,#_html summary h5,#_html summary h6 {
+  display:inline-block;
+}
+
+#_html summary h1,#_html summary h2 {
+  padding-bottom:0;
+  border-bottom:0;
+}
+
+#_html ul.no-list,#_html ol.no-list {
+  padding:0;
+  list-style-type:none;
+}
+
+#_html ol[type="a s"] {
+  list-style-type:lower-alpha;
+}
+
+#_html ol[type="A s"] {
+  list-style-type:upper-alpha;
+}
+
+#_html ol[type="i s"] {
+  list-style-type:lower-roman;
+}
+
+#_html ol[type="I s"] {
+  list-style-type:upper-roman;
+}
+
+#_html ol[type="1"] {
+  list-style-type:decimal;
+}
+
+#_html div>ol:not([type]) {
+  list-style-type:decimal;
+}
+
+#_html ul ul,#_html ul ol,#_html ol ol,#_html ol ul {
+  margin-top:0;
+  margin-bottom:0;
+}
+
+#_html li>p {
+  margin-top:12px;
+}
+
+#_html li+li {
+  margin-top:.25em;
+}
+
+#_html dl {
+  padding:0;
+}
+
+#_html dl dt {
+  padding:0;
+  margin-top:16px;
+  font-size:1em;
+  font-style:italic;
+  font-weight:600;
+}
+
+#_html dl dd {
+  padding:0 16px;
+  margin-bottom:16px;
+}
+
+#_html table th {
+  font-weight:600;
+}
+
+#_html table th,#_html table td {
+  padding:6px 13px;
+  border:1px solid #d0d7de;
+}
+
+#_html table td>:last-child {
+  margin-bottom:0;
+}
+
+#_html table tr {
+  background-color:#ffffff;
+  border-top:1px solid hsla(210,18%,87%,1);
+}
+
+#_html table tr:nth-child(2n) {
+  background-color:#f6f8fa;
+}
+
+#_html table img {
+  background-color:transparent;
+}
+
+#_html img[align=right] {
+  padding-left:20px;
+}
+
+#_html img[align=left] {
+  padding-right:20px;
+}
+
+#_html .emoji {
+  max-width:none;
+  vertical-align:text-top;
+  background-color:transparent;
+}
+
+#_html code,#_html tt {
+  padding:.2em .4em;
+  margin:0;
+  font-size:85%;
+  white-space:break-spaces;
+  background-color:rgba(175,184,193,0.2);
+  border-radius:6px;
+}
+
+#_html code br,#_html tt br {
+  display:none;
+}
+
+#_html del code {
+  text-decoration:inherit;
+}
+
+#_html samp {
+  font-size:85%;
+}
+
+#_html pre code {
+  font-size:100%;
+}
+
+#_html pre>code {
+  padding:0;
+  margin:0;
+  word-break:normal;
+  white-space:pre;
+  background:transparent;
+  border:0;
+}
+
+#_html .highlight {
+  margin-bottom:16px;
+}
+
+#_html .highlight pre {
+  margin-bottom:0;
+  word-break:normal;
+}
+
+#_html .highlight pre,#_html pre {
+  padding:16px;
+  overflow:auto;
+  font-size:85%;
+  line-height:1.45;
+  color:#1F2328;
+  background-color:#f6f8fa;
+  border-radius:6px;
+}
+
+#_html pre code,#_html pre tt {
+  display:inline;
+  max-width:auto;
+  padding:0;
+  margin:0;
+  overflow:visible;
+  line-height:inherit;
+  word-wrap:normal;
+  background-color:transparent;
+  border:0;
+}
+
+#_html [data-footnote-ref]::before {
+  content:"[";
+}
+
+#_html [data-footnote-ref]::after {
+  content:"]";
+}
+
+#_html .footnotes {
+  font-size:12px;
+  color:#656d76;
+  border-top:1px solid #d0d7de;
+}
+
+#_html .footnotes ol {
+  padding-left:16px;
+}
+
+#_html .footnotes ol ul {
+  display:inline-block;
+  padding-left:16px;
+  margin-top:16px;
+}
+
+#_html .footnotes li {
+  position:relative;
+}
+
+#_html .footnotes li:target::before {
+  position:absolute;
+  top:-8px;
+  right:-8px;
+  bottom:-8px;
+  left:-24px;
+  pointer-events:none;
+  content:"";
+  border:2px solid #0969da;
+  border-radius:6px;
+}
+
+#_html .footnotes li:target {
+  color:#1F2328;
+}
+
+#_html .task-list-item {
+  list-style-type:none;
+}
+
+#_html .task-list-item label {
+  font-weight:400;
+}
+
+#_html .task-list-item.enabled label {
+  cursor:pointer;
+}
+
+#_html .task-list-item+.task-list-item {
+  margin-top:4px;
+}
+
+#_html .task-list-item .handle {
+  display:none;
+}
+
+#_html .task-list-item-checkbox {
+  margin:0 .2em .25em -1.4em;
+  vertical-align:middle;
+}
+
+/* 自定义阅读参数：字体、字号、行高。 */
+#_html {
+  font-family:"FZYouSongJS","Songti SC",serif;
+  font-size:18px;
+  line-height:1.8;
+}
+
+body._theme-github-fzyousongjs {
+  background:#fff;
+  color:#1f2328;
+}
+
+/* 页面宽度和内边距：修改 width / padding 即可。 */
+#_html.markdown-theme {
+  box-sizing:border-box;
+  width:1000px!important;
+  min-width:0;
+  max-width:100%!important;
+  padding:32px 40px!important;
+  margin:20px auto!important;
+  border:1px solid #e1e4e8;
+  overflow:auto;
+}
+
+/* 对应插件 Content Width；auto 时使用上面的默认宽度。 */
+#_html._width-full {
+  width:100%!important;
+}
+
+#_html._width-wide {
+  width:1400px!important;
+}
+
+#_html._width-large {
+  width:1200px!important;
+}
+
+#_html._width-medium {
+  width:992px!important;
+}
+
+#_html._width-small {
+  width:768px!important;
+}
+
+#_html._width-tiny {
+  width:576px!important;
+}
+
+#_html[class*="_width-"] {
+  border:0;
+  padding:20px!important;
+}
+
+#_html img {
+  background-color:transparent;
+}
+
+#_toc {
+  font-family:"FZYouSongJS","Songti SC",serif;
+  font-size:16px;
+  line-height:1.8;
+  background:#fff;
+}
+
+#_toc a {
+  color:#0969da;
+  text-decoration:none;
+}
+
+#_toc a:hover {
+  text-decoration:underline;
+}
+
+@media print {
+  #_html.markdown-theme {
+    width:100%!important;
+    border:0;
+    padding:20px!important;
+    margin:0!important;
+  }
+}
+
+/* 表头不拆字，避免“对象”等短标签被长内容列挤成竖排。
+ * 正文单元格正常换行；列过多时沿用表格的横向滚动。 */
+#_html table th {
+  white-space:nowrap;
+}
+
+/*
+MIT License
+
+Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (https://sindresorhus.com)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/

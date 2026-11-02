@@ -1,6 +1,8 @@
 
 # Markdown Viewer / Browser Extension
 
+> **Custom edition:** four built-in FZYouSongJS themes (Lapis by default), a focused theme menu, and collapsible YAML/TOML front matter. See [CUSTOM.md](CUSTOM.md) for setup and maintenance.
+
 **Install: [Chrome]** / **[Firefox]** / **[Edge]** / **[Opera]**  / **[Brave]** / **[Chromium]** / **[Vivaldi]**
 
 # Features

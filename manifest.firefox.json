@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name"            : "Markdown Viewer",
-  "version"         : "5.3",
+  "name"            : "Markdown Viewer Custom",
+  "version"         : "5.3.1",
   "description"     : "Dark Mode • Themes • Autoreload • Mermaid Diagrams • MathJax • ToC • Syntax Highlighting",
 
-  "homepage_url": "https://github.com/simov/markdown-viewer",
+  "homepage_url": "https://github.com/qianliu013/markdown-viewer/tree/custom",
 
   "icons": {
     "16" : "/icons/default/16x16.png",
@@ -22,7 +22,7 @@
       "48" : "/icons/default/48x48.png",
       "128" : "/icons/default/128x128.png"
     },
-    "default_title": "Markdown Viewer",
+    "default_title": "Markdown Viewer Custom",
     "default_popup": "/popup/index.html"
   },
 

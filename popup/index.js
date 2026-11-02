@@ -7,41 +7,19 @@ var Popup = () => {
     content: {},
     theme: '',
     themes: {},
+    // Only the four maintained reading themes are exposed.
     _themes: [
-      'github',
-      'github-dark',
-      // 'air',
-      'almond',
-      'awsm',
-      'axist',
-      'bamboo',
-      'bullframe',
-      'holiday',
-      'kacit',
-      'latex',
-      'marx',
-      'mini',
-      'modest',
-      'new',
-      'no-class',
-      'pico',
-      'retro',
-      'sakura',
-      'sakura-vader',
-      'semantic',
-      'simple',
-      // 'splendor',
-      'style-sans',
-      'style-serif',
-      'stylize',
-      'superstylin',
-      'tacit',
-      'vanilla',
-      'water',
-      'water-dark',
-      'writ',
-      'custom',
+      'lapis-fzyousongjs',
+      'github-fzyousongjs',
+      'purple-black-fzyousongjs',
+      'phycat-sky-fzyousongjs',
     ],
+    _themeLabels: {
+      'lapis-fzyousongjs': 'Lapis',
+      'github-fzyousongjs': 'GitHub',
+      'purple-black-fzyousongjs': 'Purple 黑色',
+      'phycat-sky-fzyousongjs': 'Phycat 天蓝',
+    },
     _width: [
       'auto',
       'full',
@@ -65,6 +43,7 @@ var Popup = () => {
         mathjax: 'Render MathJax formulas',
         mermaid: 'Mermaid diagrams',
         syntax: 'Syntax highlighting for fenced code blocks',
+        frontmatter: 'Show collapsible YAML / TOML document metadata',
       }
     },
     settings: {}
@@ -225,7 +204,7 @@ var Popup = () => {
             onchange: events.theme
             },
             state._themes.map((theme) =>
-              m('option', {selected: state.theme === theme}, theme)
+              m('option', {selected: state.theme === theme}, state._themeLabels[theme])
             )
           ),
           m('select.mdc-elevation--z2 m-select', {
@@ -321,7 +300,7 @@ var Popup = () => {
                 onchange: events.theme
                 },
                 state._themes.map((theme) =>
-                  m('option', {selected: state.theme === theme}, theme)
+                  m('option', {selected: state.theme === theme}, state._themeLabels[theme])
                 )
               )
             ),
