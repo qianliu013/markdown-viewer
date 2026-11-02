@@ -19,9 +19,25 @@ md.storage = ({compilers}) => {
     chrome.storage.sync.get((res) => {
       try {
         if (chrome.runtime.lastError) throw new Error(chrome.runtime.lastError.message)
+        res = res || {}
         Object.assign(state, JSON.parse(JSON.stringify(defaults)), res)
+        // Sync can contain incomplete/invalid values from older installations.
+        // Keep an intentional empty origin map; only repair invalid containers.
+        if (!state.origins || typeof state.origins !== 'object' || Array.isArray(state.origins)) {
+          state.origins = JSON.parse(JSON.stringify(defaults.origins))
+        }
+        for (var origin of Object.keys(state.origins)) {
+          var rule = state.origins[origin]
+          if (!rule || typeof rule !== 'object' || Array.isArray(rule)) delete state.origins[origin]
+        }
+        if (!state.themes || typeof state.themes !== 'object') {
+          state.themes = {...defaults.themes}
+        }
         for (var key of ['content', 'settings', 'custom', ...Object.keys(compilers)]) {
           state[key] = Object.assign({}, defaults[key], res[key])
+        }
+        if (typeof state.theme !== 'string' && !(state.theme && typeof state.theme.name === 'string')) {
+          state.theme = defaults.theme
         }
         if (!compilers[state.compiler]) state.compiler = defaults.compiler
         md.storage.migrations(state)

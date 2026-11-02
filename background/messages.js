@@ -25,23 +25,18 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
         sendResponse({err, body})
       })
     }
-    else if (req.message === 'prism') {
-      chrome.scripting.executeScript({
-        target: {tabId: sender.tab.id},
-        files: [
-          `/vendor/prism/prism-${req.language}.min.js`,
-        ],
-        injectImmediately: true
-      }, sendResponse)
-    }
-    else if (req.message === 'mathjax') {
-      chrome.scripting.executeScript({
-        target: {tabId: sender.tab.id},
-        files: [
-          `/vendor/mathjax/extensions/${req.extension}.js`,
-        ],
-        injectImmediately: true
-      }, sendResponse)
+    else if (req.message === 'prism' || req.message === 'mathjax') {
+      // A delayed dependency belongs to the requesting document, not whichever
+      // page the tab may have navigated to while the worker was waking up.
+      var target = {tabId: sender.tab.id}
+      if (sender.documentId) target.documentIds = [sender.documentId]
+      var file = req.message === 'prism'
+        ? `/vendor/prism/prism-${req.language}.min.js`
+        : `/vendor/mathjax/extensions/${req.extension}.js`
+      var result = await chrome.scripting.executeScript({
+        target, files: [file], injectImmediately: true
+      })
+      sendResponse(result)
     }
 
     // popup

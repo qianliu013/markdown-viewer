@@ -1,5 +1,9 @@
 
 var $ = document.querySelector.bind(document)
+// Resolve while this context is live. Redraws in an old tab must not call an
+// invalidated runtime merely to retain its existing stylesheet URLs.
+var extensionRoot = chrome.runtime.getURL('/')
+var assetURL = (path) => extensionRoot + path.replace(/^\//, '')
 
 var state = {
   theme: args.theme,
@@ -137,37 +141,43 @@ var render = (md) => {
   var parsed = parseFrontmatter(md)
   state.frontmatter = parsed.metadata
   if (parsed.title) document.title = parsed.title
-  chrome.runtime.sendMessage({
-    message: 'markdown',
-    compiler: state.compiler,
-    markdown: parsed.body
-  }, (res) => {
+  try {
+    chrome.runtime.sendMessage({
+      message: 'markdown',
+      compiler: state.compiler,
+      markdown: parsed.body
+    }, (res) => {
+      clearTimeout(timer)
+      var error = chrome.runtime.lastError
+      if (renderId !== state.renderId) return
+      if (error || !res || res.error || typeof res.html !== 'string') {
+        fail('渲染失败，已显示原文。' + (error ? error.message : (res && res.error) || '后台未返回内容'))
+        return
+      }
+      state.error = ''
+      state.reload.md = true
+      state.html = res.html
+      state.ready = true
+      if (state.content.emoji) {
+        state.html = emojinator(state.html)
+      }
+      if (state.content.mermaid) {
+        state.html = state.html.replace(
+          /<code class="language-(?:mermaid|mmd)">/gi,
+          '<code class="mermaid">'
+        )
+      }
+      if (state.content.toc) {
+        state.toc = toc.render(state.html)
+      }
+      state.html = anchors(state.html)
+      m.redraw()
+    })
+  }
+  catch (err) {
     clearTimeout(timer)
-    var error = chrome.runtime.lastError
-    if (renderId !== state.renderId) return
-    if (error || !res || res.error || typeof res.html !== 'string') {
-      fail('渲染失败，已显示原文。' + (error ? error.message : (res && res.error) || '后台未返回内容'))
-      return
-    }
-    state.error = ''
-    state.reload.md = true
-    state.html = res.html
-    state.ready = true
-    if (state.content.emoji) {
-      state.html = emojinator(state.html)
-    }
-    if (state.content.mermaid) {
-      state.html = state.html.replace(
-        /<code class="language-(?:mermaid|mmd)">/gi,
-        '<code class="mermaid">'
-      )
-    }
-    if (state.content.toc) {
-      state.toc = toc.render(state.html)
-    }
-    state.html = anchors(state.html)
-    m.redraw()
-  })
+    fail('扩展连接已失效，已显示原文。请刷新页面重新连接。')
+  }
 }
 
 function mount () {
@@ -201,14 +211,14 @@ function mount () {
         dom.push(m('link#_theme', {
           onupdate: onupdate.theme,
           rel: 'stylesheet', type: 'text/css',
-          href: state.theme !== 'custom' ? chrome.runtime.getURL(`/themes/${state.theme}.css`) : '',
+          href: state.theme !== 'custom' ? assetURL(`/themes/${state.theme}.css`) : '',
         }))
         $('body').classList.add(`_theme-${state.theme}`, `_color-${color}`)
 
         if (state.content.syntax) {
           dom.push(m('link#_prism', {
             rel: 'stylesheet', type: 'text/css',
-            href: chrome.runtime.getURL(`/vendor/${color === 'dark' ? 'prism-okaidia' : 'prism'}.min.css`),
+            href: assetURL(`/vendor/${color === 'dark' ? 'prism-okaidia' : 'prism'}.min.css`),
           }))
         }
 
@@ -285,7 +295,7 @@ var toc = (() => {
 var favicon = () => {
   var favicon = document.createElement('link')
   favicon.rel = 'icon'
-  favicon.href = chrome.runtime.getURL(`/icons/${state.icon}/16x16.png`)
+  favicon.href = assetURL(`/icons/${state.icon}/16x16.png`)
   $('head').appendChild(favicon)
 }
 

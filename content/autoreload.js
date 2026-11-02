@@ -1,11 +1,15 @@
 
 ;(() => {
-  var current = null
+  var current = typeof state.markdown === 'string' ? state.markdown : null
+  var stopped = false
+  var pending = false
+  var stop = () => {
+    stopped = true
+    clearInterval(state.reload.interval)
+  }
 
   var response = (md) => {
-    if (current === null) {
-      current = md
-    }
+    if (current === null) current = md
     else if (current !== md) {
       state.reload.md = true
       current = md
@@ -14,39 +18,53 @@
   }
 
   var xhr = new XMLHttpRequest()
+  xhr.timeout = 10000
   xhr.onreadystatechange = () => {
-    if (xhr.readyState === 4) {
-      response(xhr.responseText)
-    }
+    if (xhr.readyState !== 4) return
+    pending = false
+    // Network errors and HTTP error pages must not replace a readable document.
+    if (!stopped && xhr.status >= 200 && xhr.status < 300) response(xhr.responseText)
   }
+  xhr.onerror = xhr.ontimeout = xhr.onabort = () => { pending = false }
 
   var get = () => {
+    if (stopped || pending) return
+    pending = true
     if (location.protocol === 'file:') {
-      chrome.runtime.sendMessage({
-        message: 'autoreload',
-        location: location.href
-      }, (res) => {
-        if (res.err) {
-          console.error(res.err)
-          clearInterval(state.reload.interval)
-        }
-        else {
-          response(res.body)
-        }
-      })
+      try {
+        chrome.runtime.sendMessage({
+          message: 'autoreload', location: location.href
+        }, (res) => {
+          pending = false
+          if (chrome.runtime.lastError || !res || res.error || res.err || typeof res.body !== 'string') {
+            stop()
+            return
+          }
+          if (!stopped) response(res.body)
+        })
+      }
+      catch (err) {
+        // Reloading the extension invalidates APIs in existing tabs. Keep the
+        // displayed document and stop polling until the user refreshes the tab.
+        pending = false
+        stop()
+      }
     }
     else {
-      xhr.open('GET', location.href + '?preventCache=' + Date.now(), true)
       try {
+        var url = new URL(location.href)
+        url.hash = ''
+        url.searchParams.set('preventCache', Date.now())
+        xhr.open('GET', url.href, true)
         xhr.send()
       }
       catch (err) {
-        console.error(err)
-        clearInterval(state.reload.interval)
+        pending = false
+        stop()
       }
     }
   }
 
   get()
-  state.reload.interval = setInterval(get, state.reload.ms)
+  if (!stopped) state.reload.interval = setInterval(get, state.reload.ms)
 })()

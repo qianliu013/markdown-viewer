@@ -184,3 +184,25 @@ test('both theme menus use only the four bundled themes with matching light styl
     assert.equal(tree.find(x => x.selector === 'link#_theme').children[0].href, '/themes/' + theme + '.css')
   }
 })
+
+
+test('synchronous invalidated-context errors preserve the full source immediately', () => {
+  const h = harness(true)
+  h.chrome.runtime.sendMessage = () => {throw new Error('Extension context invalidated.')}
+  assert.doesNotThrow(() => h.render('# Original document'))
+  assert.equal(h.state.raw, true)
+  assert.equal(h.state.ready, true)
+  const tree = h.component.view()
+  assert.equal(tree.find(x => x.selector === 'pre#_markdown').children[1], '# Original document')
+})
+
+
+test('an existing view can redraw after all extension URL and messaging APIs are invalidated', () => {
+  const h = harness(true)
+  h.render('# Reading'); h.respond()
+  h.chrome.runtime.getURL = () => {throw new Error('Extension context invalidated.')}
+  h.chrome.runtime.sendMessage = h.chrome.runtime.getURL
+  assert.doesNotThrow(() => h.component.view())
+  h.render('# Preserved')
+  assert.doesNotThrow(() => h.component.view())
+})

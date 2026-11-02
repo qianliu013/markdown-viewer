@@ -79,7 +79,10 @@ md.detect = ({storage: {state}, inject}) => {
   }
 
   var detect = (content, url) => {
-    var location = new URL(url)
+    // Fail closed if the detector is called without initialized origin rules.
+    if (!state.origins || typeof state.origins !== 'object') return
+    var location
+    try { location = new URL(url) } catch (err) { return }
 
     var origin =
       state.origins[location.origin] ||
@@ -96,10 +99,16 @@ md.detect = ({storage: {state}, inject}) => {
 
       state.origins['*://*']
 
+    var pathMatch = false
+    try {
+      if (origin && origin.path && origin.match) pathMatch = new RegExp(origin.match).test(location.href)
+    }
+    catch (err) { return } // An invalid saved pattern must not break tab events.
+
     return (
-      (origin && origin.header && origin.path && origin.match && /\btext\/(?:(?:(?:x-)?markdown)|plain)\b/i.test(content) && new RegExp(origin.match).test(location.href)) ||
+      (origin && origin.header && origin.path && origin.match && /\btext\/(?:(?:(?:x-)?markdown)|plain)\b/i.test(content) && pathMatch) ||
       (origin && origin.header && !origin.path && /\btext\/(?:(?:(?:x-)?markdown)|plain)\b/i.test(content)) ||
-      (origin && origin.path && origin.match && !origin.header && new RegExp(origin.match).test(location.href))
+      (origin && origin.path && origin.match && !origin.header && pathMatch)
         ? origin
         : undefined
     )
