@@ -11,6 +11,8 @@ var state = {
   icon: args.icon,
   html: '',
   ready: false,
+  error: '',
+  renderId: 0,
   markdown: '',
   frontmatter: null,
   frontmatterOpen: true,
@@ -121,7 +123,17 @@ var update = (update) => {
 }
 
 var render = (md) => {
+  var renderId = ++state.renderId
   state.markdown = md
+  var fail = (message) => {
+    if (renderId !== state.renderId) return
+    state.error = message
+    state.ready = true
+    state.raw = true
+    state.reload.md = true
+    m.redraw()
+  }
+  var timer = setTimeout(() => fail('渲染超时，已显示原文。请刷新页面重试。'), 10000)
   var parsed = parseFrontmatter(md)
   state.frontmatter = parsed.metadata
   if (parsed.title) document.title = parsed.title
@@ -130,6 +142,15 @@ var render = (md) => {
     compiler: state.compiler,
     markdown: parsed.body
   }, (res) => {
+    clearTimeout(timer)
+    var error = chrome.runtime.lastError
+    if (renderId !== state.renderId) return
+    if (error || !res || res.error || typeof res.html !== 'string') {
+      fail('渲染失败，已显示原文。' + (error ? error.message : (res && res.error) || '后台未返回内容'))
+      return
+    }
+    state.error = ''
+    state.reload.md = true
     state.html = res.html
     state.ready = true
     if (state.content.emoji) {
@@ -150,7 +171,6 @@ var render = (md) => {
 }
 
 function mount () {
-  $('pre').style.display = 'none'
   var md = $('pre').innerText
   favicon()
 
@@ -164,7 +184,12 @@ function mount () {
       // The compiler reply is asynchronous. Creating #_html before it arrives
       // runs oncreate too early and can leave the content permanently hidden.
       // An explicit ready flag also permits a metadata-only / empty document.
+      if (!state.ready) {
+        // Keep a readable source while waiting for the background compiler.
+        return m('pre#_source', state.markdown)
+      }
       if (state.ready) {
+        if (state.error) dom.push(m('div#_render-error', {role: 'alert'}, state.error))
         state._themes.custom = state.custom.color
 
         var color =

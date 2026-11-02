@@ -1,9 +1,9 @@
 
 ;(() => {
-  var current = ''
+  var current = null
 
   var response = (md) => {
-    if (!current) {
+    if (current === null) {
       current = md
     }
     else if (current !== md) {

@@ -393,3 +393,17 @@ img.emojione {
   /* prevent img stretch */
   width: auto;
 }
+
+/* Loading/error fallback must never depend on the rendering visibility gate. */
+#_source {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 24px;
+  margin: 0;
+}
+#_render-error {
+  padding: 12px 24px;
+  background: #fff3cd;
+  color: #664d03;
+  font: 14px/1.5 system-ui, sans-serif;
+}

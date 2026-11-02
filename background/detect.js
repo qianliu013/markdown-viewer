@@ -40,7 +40,7 @@ md.detect = ({storage: {state}, inject}) => {
             JSON.stringify({
               url: window.location.href,
               header: document.contentType,
-              loaded: !!window.state,
+              loaded: !!window.state || !!window.__markdownViewerLoading,
             })
         }, (res) => {
           if (chrome.runtime.lastError) {
@@ -70,7 +70,7 @@ md.detect = ({storage: {state}, inject}) => {
               chrome.tabs.reload(id)
             }
             else {
-              inject(id)
+              inject(id, res[0].documentId)
             }
           }
         })

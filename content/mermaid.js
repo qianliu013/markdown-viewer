@@ -37,6 +37,7 @@ var mmd = (() => {
           })
         }
       }, 50)
+      setTimeout(() => clearInterval(timeout), 5000)
     }
   }
 })()
