@@ -627,10 +627,25 @@ body._theme-github-fzyousongjs {
   }
 }
 
-/* 表头不拆字，避免“对象”等短标签被长内容列挤成竖排。
- * 正文单元格正常换行；列过多时沿用表格的横向滚动。 */
-#_html table th {
-  white-space:nowrap;
+/* 表格阅读：长表头可换行，普通单词不拆字；仅长代码路径允许任意折行。
+ * 保留局部横向滚动，不改变表格外的正文、代码块和页面宽度。 */
+#_html table :is(th,td) {
+  min-width:3em;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+  vertical-align:top;
+  line-height:1.55;
+}
+#_html table :is(th,td) code:not(pre code) {
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:anywhere;
+}
+/* 空首列表头的横向对照表：首列是行标签，避免被长指标列挤窄。
+ * 不对所有第一列强制不换行，长问题、长说明仍可正常排版。 */
+#_html table:has(>thead>tr>th:first-child:empty) :is(th,td):first-child {
+  min-width:7em;
 }
 
 /*
