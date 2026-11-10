@@ -1,0 +1,492 @@
+/*
+ * Cyanosis 青蓝 — Markdown Viewer 自定义浅色主题
+ * 来源：https://github.com/linxsbox/juejin-markdown-theme-cyanosis（掘金社区主题，取自 juejin-markdown-themes 1.34.0）
+ * 内置主题：在 Content Theme 中选择；浅色模式。
+ * 本机需已安装 FZYouSongJS；代码使用等宽字体。
+ * 字体、字号、行高在下方 --reader-font / --reader-size / --reader-leading 中调整。
+ * 默认外框宽 1000px，左右内边距各 40px；视口较小时自动收窄。
+ * Content Width 的 full / wide / large 等设置会覆盖默认宽度。
+ * 修改此文件后运行 sh build/custom-themes.sh，再刷新 Markdown 页面。
+ * 保留原主题的配色、「」二级标题、» 三级标题、引用块和表格；
+ * 去掉掘金站内用的暗色变量与过渡动画、分隔线中的图标与彩色渐变、
+ * 链接悬停动画、选中文字变色、红色勾选框和 details 虚线框。
+ */
+
+:root {
+  --reader-font: "FZYouSongJS", "Songti SC", serif;
+  --reader-size: 18px;
+  --reader-leading: 1.8;
+  --reader-mono: Menlo, Monaco, Consolas, "Courier New", monospace;
+  --cy-text: #353535;
+  --cy-title: #005bb7;
+  --cy-strong: #2196f3;
+  --cy-em: #4fc3f7;
+  --cy-del: #ccc;
+  --cy-link: #3da8f5;
+  --cy-link-hover: #007fff;
+  --cy-border: #bedcff;
+  --cy-border-2: #ececec;
+  --cy-quote: #8c8c8c;
+  --cy-quote-bg: #f0fdff;
+  --cy-code: #c2185b;
+  --cy-code-bg: #fff4f4;
+  --cy-pre-bg: #f8f8f8;
+  --cy-table-border: #c3e0fd;
+  --cy-th-bg: #dff0ff;
+  --cy-tr-alt: #f7fbff;
+  --cy-tr-hover: #e0edf7;
+  --cy-selection: rgba(175, 207, 247, .35);
+}
+
+body._theme-cyanosis-fzyousongjs {
+  background:#fff;
+  color:var(--cy-text);
+}
+
+/* 页面宽度和内边距：修改 width / padding 即可。 */
+#_html.markdown-theme {
+  box-sizing:border-box;
+  width:1000px!important;
+  min-width:0;
+  max-width:100%!important;
+  padding:36px 40px 72px!important;
+  margin:0 auto!important;
+  font-family:var(--reader-font);
+  font-size:var(--reader-size);
+  line-height:var(--reader-leading);
+  color:var(--cy-text);
+  overflow-wrap:anywhere;
+}
+
+/* 对应插件 Content Width；auto 时使用上面的默认宽度。 */
+#_html._width-full {
+  width:100%!important;
+}
+
+#_html._width-wide {
+  width:1400px!important;
+}
+
+#_html._width-large {
+  width:1200px!important;
+}
+
+#_html._width-medium {
+  width:992px!important;
+}
+
+#_html._width-small {
+  width:768px!important;
+}
+
+#_html._width-tiny {
+  width:576px!important;
+}
+
+#_html ::selection {
+  background:var(--cy-selection);
+}
+
+/* 普通段落段后间距 12px；正文保持 18px、1.8 倍行高。 */
+#_html p {
+  margin:0 0 12px;
+}
+
+#_html>:first-child {
+  margin-top:0;
+}
+
+#_html :is(strong,b) {
+  color:var(--cy-strong);
+  font-weight:700;
+}
+
+#_html :is(em,i) {
+  color:var(--cy-em);
+}
+
+/* markdown-it 输出 <s>，其他编译器输出 <del>。 */
+#_html :is(del,s) {
+  color:var(--cy-del);
+}
+
+#_html a:not(.anchor) {
+  color:var(--cy-link);
+  text-decoration:none;
+  border-bottom:1px solid var(--cy-border);
+}
+
+#_html a:not(.anchor):hover {
+  color:var(--cy-link-hover);
+  border-bottom-color:var(--cy-link-hover);
+}
+
+/* 标题间距采用固定像素，避免随标题字号放大；上疏下紧以保留层次。 */
+#_html :is(h1,h2,h3,h4,h5,h6) {
+  position:relative;
+  font-family:var(--reader-font);
+  color:var(--cy-title);
+  font-weight:700;
+  line-height:1.4;
+  scroll-margin-top:24px;
+}
+
+#_html h1 {
+  font-size:2em;
+  margin:24px 0 12px;
+  padding-bottom:4px;
+}
+
+/* 原主题的标志：二级标题用「」包裹，下方一条浅灰细线。 */
+#_html h2 {
+  font-size:1.5em;
+  margin:32px 0 12px;
+  padding:0 10px 8px;
+  border-bottom:1px solid var(--cy-border-2);
+}
+
+#_html h2::before {
+  content:"「";
+  position:absolute;
+  top:-.25em;
+  left:-.55em;
+}
+
+#_html h2::after {
+  content:"」";
+  position:relative;
+  top:.25em;
+}
+
+/* 锚点图标让到「左侧，悬停时不与括号重叠。 */
+#_html h2 .anchor {
+  margin-left:-44px;
+}
+
+#_html h3 {
+  font-size:1.3em;
+  margin:24px 0 8px;
+  padding-left:6px;
+}
+
+#_html h3::before {
+  content:"»";
+  padding-right:6px;
+  color:var(--cy-strong);
+}
+
+#_html h4 {
+  font-size:1.15em;
+  margin:18px 0 8px;
+  padding-left:6px;
+}
+
+#_html h5 {
+  font-size:1.05em;
+  margin:14px 0 6px;
+  padding-left:6px;
+}
+
+#_html h6 {
+  font-size:1em;
+  margin:12px 0 6px;
+  padding-left:6px;
+}
+
+#_html :is(h1,h2,h3,h4,h5,h6) code {
+  font-size:.9em;
+}
+
+#_html .anchor {
+  color:inherit;
+  text-decoration:none;
+  border:0;
+}
+
+#_html :is(ul,ol) {
+  margin:8px 0 12px;
+  padding-left:28px;
+}
+
+#_html li {
+  margin:4px 0;
+}
+
+#_html ol>li {
+  padding-left:6px;
+}
+
+#_html li>p {
+  margin:4px 0;
+}
+
+#_html li>:is(ul,ol) {
+  margin:4px 0;
+}
+
+/* 列表项末尾不再叠加段落或嵌套列表的留白。 */
+#_html li>:last-child {
+  margin-bottom:0;
+}
+
+#_html blockquote {
+  color:var(--cy-quote);
+  border-left:4px solid var(--cy-strong);
+  background:var(--cy-quote-bg);
+  padding:12px 20px;
+  margin:16px 0;
+}
+
+#_html blockquote>:first-child {
+  margin-top:0;
+}
+
+#_html blockquote>:last-child {
+  margin-bottom:0;
+}
+
+#_html :is(code,kbd,samp,pre) {
+  font-family:var(--reader-mono);
+}
+
+#_html :not(pre)>code {
+  color:var(--cy-code);
+  font-size:.88em;
+  padding:.065em .4em;
+  border-radius:2px;
+  background:var(--cy-code-bg);
+  overflow-wrap:anywhere;
+}
+
+#_html pre {
+  margin:16px 0;
+  padding:16px 20px;
+  background:var(--cy-pre-bg);
+  color:#333;
+  font-size:.85em;
+  line-height:1.65;
+  overflow:auto;
+  tab-size:2;
+}
+
+#_html pre::-webkit-scrollbar {
+  width:4px;
+  height:4px;
+}
+
+#_html pre::-webkit-scrollbar-track {
+  background:var(--cy-border);
+}
+
+#_html pre::-webkit-scrollbar-thumb {
+  background:var(--cy-strong);
+  border-radius:10px;
+}
+
+#_html pre>code {
+  display:block;
+  padding:0;
+  margin:0;
+  font-size:inherit;
+  line-height:inherit;
+  white-space:pre;
+  overflow-wrap:normal;
+  word-break:normal;
+  background:transparent;
+  color:inherit;
+  text-shadow:none;
+}
+
+/* 原主题不带代码配色（掘金另配 highlight.js），这里沿用 Prism 默认浅色配色，只去掉白色描边和底色。 */
+#_html .token {
+  background:transparent;
+  text-shadow:none;
+}
+
+#_html pre:has(>code.mermaid) {
+  background:transparent;
+}
+
+#_html img {
+  max-width:100%;
+  height:auto;
+  box-sizing:border-box;
+}
+
+#_html p>img:only-child {
+  display:block;
+  margin:1em auto;
+}
+
+#_html table {
+  display:block;
+  width:max-content;
+  max-width:100%;
+  margin:1em 0 1.3em;
+  overflow-x:auto;
+  border:1px solid var(--cy-table-border);
+  border-collapse:collapse;
+  border-spacing:0;
+  font-size:.94em;
+}
+
+#_html :is(th,td) {
+  border:1px solid var(--cy-table-border);
+  padding:8px 14px;
+}
+
+#_html th {
+  color:var(--cy-title);
+  font-weight:700;
+  text-align:left;
+  background:var(--cy-th-bg);
+}
+
+#_html tbody tr:nth-child(2n) {
+  background:var(--cy-tr-alt);
+}
+
+#_html tbody tr:hover {
+  background:var(--cy-tr-hover);
+}
+
+#_html hr {
+  border:0;
+  border-top:1px solid var(--cy-border-2);
+  margin:32px 0;
+}
+
+#_html mark {
+  background:#ffffb5c2;
+  color:inherit;
+  padding:1px .15em;
+}
+
+#_html kbd {
+  border:1px solid var(--cy-border);
+  border-radius:3px;
+  padding:1px 5px;
+  font-size:.85em;
+}
+
+#_html .task-list-item {
+  list-style-type:none;
+}
+
+#_html input[type=checkbox] {
+  accent-color:var(--cy-strong);
+  margin-right:.45em;
+}
+
+#_html .footnotes {
+  border-top:1px solid var(--cy-border-2);
+  font-size:.85em;
+  margin-top:2em;
+}
+
+#_html dl dt {
+  color:var(--cy-title);
+  font-weight:700;
+}
+
+#_html dl dd {
+  margin:.4em 0 1em 1.5em;
+}
+
+#_toc {
+  background:#fff;
+  font-family:var(--reader-font);
+  font-size:16px;
+  line-height:1.65;
+}
+
+#_toc a {
+  color:var(--cy-title);
+  text-decoration:none;
+  border-radius:4px;
+}
+
+#_toc a:hover {
+  background:var(--cy-quote-bg);
+}
+
+@media (max-width:600px) {
+  #_html.markdown-theme {
+    padding:20px 22px 40px!important;
+  }
+  #_html h1 {
+    font-size:1.7em;
+  }
+  #_html h2 {
+    font-size:1.35em;
+  }
+  #_html pre {
+    padding:16px;
+  }
+}
+
+@media print {
+  #_html.markdown-theme {
+    width:100%!important;
+    padding:0!important;
+    color:#000;
+  }
+  #_html :is(h1,h2,h3,h4,h5,h6) {
+    break-after:avoid;
+  }
+  #_html pre {
+    white-space:pre-wrap;
+  }
+  #_html pre>code {
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+  }
+  #_toc {
+    display:none;
+  }
+}
+
+/* 表格阅读：长表头可换行，普通单词不拆字；仅长代码路径允许任意折行。
+ * 保留局部横向滚动，不改变表格外的正文、代码块和页面宽度。 */
+#_html table :is(th,td) {
+  min-width:3em;
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:normal;
+  vertical-align:top;
+  line-height:1.55;
+}
+#_html table :is(th,td) code:not(pre code) {
+  white-space:normal;
+  word-break:normal;
+  overflow-wrap:anywhere;
+}
+/* 空首列表头的横向对照表：首列是行标签，避免被长指标列挤窄。
+ * 不对所有第一列强制不换行，长问题、长说明仍可正常排版。 */
+#_html table:has(>thead>tr>th:first-child:empty) :is(th,td):first-child {
+  min-width:7em;
+}
+
+/*
+MIT License
+
+Copyright (c) 2020 Lin
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/

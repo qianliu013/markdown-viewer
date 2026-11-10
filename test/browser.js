@@ -26,7 +26,7 @@ document.querySelector('#run').onclick=async () => {
     assert(f.contentDocument.querySelector('#_source').textContent.includes('Reading body'),'source missing')
     await wait(()=>visible(f,'#_html h1'))
   })
-  await testCase('Metadata escaping, collapse, Raw round-trip and four theme switches',async()=>{
+  await testCase('Metadata escaping, collapse, Raw round-trip and theme switches',async()=>{
     const f=await openFixture('normal');await wait(()=>visible(f,'#_html h1'))
     const w=f.contentWindow,d=f.contentDocument
     assert(!d.querySelector('details img'),'metadata executed as HTML')
@@ -35,7 +35,7 @@ document.querySelector('#run').onclick=async () => {
     assert(d.querySelector('#_markdown').textContent.includes('description:'),'Raw lost metadata')
     w.deliver({message:'raw',raw:false});await wait(()=>visible(f,'#_html h1'))
     assert(!d.querySelector('details').open,'collapse state lost')
-    for(const theme of ['github','purple-black','phycat-sky','lapis']){
+    for(const theme of ['github','purple-black','phycat-sky','cyanosis','claude-like','lapis']){
       w.deliver({message:'theme',theme:theme+'-fzyousongjs'})
       await wait(()=>d.querySelector('#_theme').getAttribute('href')==='/themes/'+theme+'-fzyousongjs.css' && !!d.querySelector('#_theme').sheet)
       assert(w.getComputedStyle(d.querySelector('#_html')).fontFamily.includes('FZYouSongJS'),'theme font missing')

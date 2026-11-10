@@ -8,18 +8,22 @@ var Popup = () => {
     content: {},
     theme: '',
     themes: {},
-    // Only the four maintained reading themes are exposed.
+    // Only the maintained reading themes are exposed.
     _themes: [
       'lapis-fzyousongjs',
       'github-fzyousongjs',
       'purple-black-fzyousongjs',
       'phycat-sky-fzyousongjs',
+      'cyanosis-fzyousongjs',
+      'claude-like-fzyousongjs',
     ],
     _themeLabels: {
       'lapis-fzyousongjs': 'Lapis',
       'github-fzyousongjs': 'GitHub',
       'purple-black-fzyousongjs': 'Purple 黑色',
       'phycat-sky-fzyousongjs': 'Phycat 天蓝',
+      'cyanosis-fzyousongjs': 'Cyanosis 青蓝',
+      'claude-like-fzyousongjs': 'Claude 暖纸',
     },
     _width: [
       'auto',

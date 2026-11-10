@@ -184,7 +184,7 @@ test('defaults and migrations keep only maintained themes and preserve opt-out',
   assert.equal(state.content.frontmatter, false)
 })
 
-test('both theme menus use only the four bundled themes with matching light styles', () => {
+test('both theme menus use only the bundled themes with matching light styles', () => {
   const h = {
     document: {querySelector: () => null}, Settings() {}, Custom() {},
     chrome: {runtime: {sendMessage() {}}},
@@ -192,7 +192,18 @@ test('both theme menus use only the four bundled themes with matching light styl
   vm.createContext(h)
   vm.runInContext(read('popup/index.js'), h)
   const themes = Array.from(h.Popup().state._themes)
-  assert.deepEqual(themes, ['lapis-fzyousongjs', 'github-fzyousongjs', 'purple-black-fzyousongjs', 'phycat-sky-fzyousongjs'])
+  assert.deepEqual(themes, ['lapis-fzyousongjs', 'github-fzyousongjs', 'purple-black-fzyousongjs', 'phycat-sky-fzyousongjs', 'cyanosis-fzyousongjs', 'claude-like-fzyousongjs'])
+  // Every menu entry needs a label and must survive the startup migration.
+  const storage = {md: {storage: {}}, chrome: {runtime: {getURL: x => x}}}
+  vm.createContext(storage)
+  vm.runInContext(read('background/storage.js'), storage)
+  for (const theme of themes) {
+    assert.ok(h.Popup().state._themeLabels[theme])
+    const saved = storage.md.storage.defaults({'markdown-it': {defaults: {}}, marked: {defaults: {}}, remark: {defaults: {}}})
+    saved.theme = theme
+    storage.md.storage.migrations(saved)
+    assert.equal(saved.theme, theme)
+  }
   const content = harness()
   for (const theme of themes) {
     assert.ok(read('custom-themes/' + theme + '.css').includes('body._theme-' + theme))

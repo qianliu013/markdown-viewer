@@ -4,7 +4,7 @@
 
 ## 定制内容
 
-- **主题**：只保留 Lapis（默认）、GitHub、Purple 黑色、Phycat 天蓝四套，字体 FZYouSongJS（需本机安装，缺失时回退 Songti SC / serif；不分发字体）。外框 1000px，正文 18px、1.8 倍行高。其他主题和 Custom CSS 入口隐藏，旧选择自动迁移为 Lapis。
+- **主题**：Lapis（默认）、GitHub、Purple 黑色、Phycat 天蓝、Cyanosis 青蓝、Claude 暖纸六套，字体 FZYouSongJS（需本机安装，缺失时回退 Songti SC / serif；不分发字体）。外框 1000px，正文 18px、1.8 倍行高。其他主题和 Custom CSS 入口隐藏，旧选择自动迁移为 Lapis。Cyanosis 来自掘金社区主题，已去掉掘金站内的装饰；Claude 暖纸来自 Typora 主题，已去掉编辑器界面样式。新增主题需同时登记到弹窗菜单（`popup/index.js`）、明暗映射（`content/index.js`）和迁移白名单（`background/storage.js`）。
 - **Front matter**：YAML / TOML 元数据作为可折叠代码块显示在正文顶部，按纯文本渲染。在 Content 中关闭 frontmatter 可隐藏；Raw 视图保留完整原文。
 - **本地代码链接**：本地 Markdown 中指向本机源码的链接，点击后用 Cursor（默认）或 VS Code 打开；可在弹窗中切换为“浏览器”恢复原链接。支持相对路径、绝对路径、`file:///`，以及 `:行:列`、`#L行`、`#L行C列`、`#L行-L行`。扩展名白名单见 `content/editor-links.js`。只改页面中的链接，不改源文件，也不检查目标文件是否存在。
 - **默认开关**：autoreload、emoji、mathjax、mermaid、syntax、frontmatter 默认开启，toc 默认关闭。已有安装保留原设置，点弹窗的 Defaults 或手动切换后生效。

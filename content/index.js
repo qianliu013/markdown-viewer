@@ -32,6 +32,8 @@ var state = {
     'github-fzyousongjs': 'light',
     'purple-black-fzyousongjs': 'light',
     'phycat-sky-fzyousongjs': 'light',
+    'cyanosis-fzyousongjs': 'light',
+    'claude-like-fzyousongjs': 'light',
 
     'github': 'light',
     'github-dark': 'dark',

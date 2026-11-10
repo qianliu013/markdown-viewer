@@ -220,7 +220,7 @@ md.storage.migrations = (state) => {
     }
   }
   // Custom edition: migrate hidden selections and preserve an explicit opt-out.
-  if (!['lapis-fzyousongjs', 'github-fzyousongjs', 'purple-black-fzyousongjs', 'phycat-sky-fzyousongjs'].includes(state.theme)) {
+  if (!['lapis-fzyousongjs', 'github-fzyousongjs', 'purple-black-fzyousongjs', 'phycat-sky-fzyousongjs', 'cyanosis-fzyousongjs', 'claude-like-fzyousongjs'].includes(state.theme)) {
     state.theme = 'lapis-fzyousongjs'
   }
   if (state.content.frontmatter === undefined) {
