@@ -355,3 +355,37 @@ test('invalid origin regex does not throw out of the asynchronous detection call
   assert.doesNotThrow(()=>detected([{result:JSON.stringify({url:'file:///test.md',header:'text/plain',loaded:false})}]))
   assert.equal(w.calls.filter(x=>x[0]==='css').length,0)
 })
+
+
+test('editor preference defaults, persists before notification, and rejects unknown values', async () => {
+  const w=worker(); w.start({})
+  assert.equal((await w.message({message:'popup'})).editor,'cursor')
+  const pending=w.holdWrites(); w.calls.length=0
+  const change=w.message({message:'popup.editor',editor:'vscode'})
+  await tick(); assert.equal(w.calls.filter(x=>x[0]==='notify').length,0)
+  pending.resolve(); await change
+  assert.equal((await w.message({message:'popup'})).editor,'vscode')
+  assert.ok(w.calls.some(x=>x[0]==='notify' && x[1].editor==='vscode'))
+  assert.ok((await w.message({message:'popup.editor',editor:'command'})).error)
+  const restored=worker();restored.start({editor:'browser'})
+  assert.equal((await restored.message({message:'popup'})).editor,'browser')
+  const invalid=worker();invalid.start({editor:null})
+  assert.equal((await invalid.message({message:'popup'})).editor,'cursor')
+})
+
+test('actual compilers preserve local code links; markdown-it allows file URLs only for local documents', async () => {
+  const w=worker();w.start({})
+  for (const compiler of ['markdown-it','marked','remark']) {
+    await w.message({message:'popup.compiler.name',compiler})
+    const reply=await w.message({message:'markdown',markdown:'[source](../src/a.wxml) [json](./data.json)'},{tab:{id:1},url:'file:///tmp/readme.md'})
+    assert.match(reply.html,/href="..\/src\/a.wxml"/)
+    assert.match(reply.html,/href=".\/data.json"/)
+  }
+  await w.message({message:'popup.compiler.name',compiler:'markdown-it'})
+  const markdown='[source](file:///tmp/a.ts) [bad](javascript:alert%281%29)'
+  const local=await w.message({message:'markdown',markdown},{tab:{id:1},url:'file:///tmp/readme.md'})
+  assert.match(local.html,/href="file:\/\/\/tmp\/a.ts"/)
+  assert.doesNotMatch(local.html,/href="javascript:/)
+  const remote=await w.message({message:'markdown',markdown},{tab:{id:1},url:'https://example.com/readme.md'})
+  assert.doesNotMatch(remote.html,/href="file:/)
+})

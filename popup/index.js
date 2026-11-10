@@ -3,6 +3,7 @@ var Popup = () => {
 
   var state = {
     compiler: '',
+    editor: 'cursor',
     options: {},
     content: {},
     theme: '',
@@ -100,6 +101,11 @@ var Popup = () => {
       })
     },
 
+    editor: (e) => {
+      state.editor = e.target.value
+      chrome.runtime.sendMessage({message: 'popup.editor', editor: state.editor})
+    },
+
     raw: () => {
       state.raw = !state.raw
       chrome.runtime.sendMessage({
@@ -130,6 +136,7 @@ var Popup = () => {
     state.theme = res.theme
     state.themes = res.themes
 
+    state.editor = res.editor
     state.raw = res.raw
     state.tab = localStorage.getItem('tab') || 'theme'
     state.compilers = res.compilers
@@ -164,6 +171,13 @@ var Popup = () => {
       vnode.dom.classList.toggle('is-checked')
     }
   }
+
+  // The popup has no label column, so its options carry the prefix.
+  var editorSelect = (prefix = '') => m('select.mdc-elevation--z2 m-select', {
+    title: '本地代码链接的打开方式', onchange: events.editor
+  }, [['cursor', 'Cursor'], ['vscode', 'VS Code'], ['browser', '浏览器']].map(([value, label]) =>
+    m('option', {value, selected: state.editor === value}, prefix + label)
+  ))
 
   var render = () =>
     m('#popup',
@@ -216,6 +230,7 @@ var Popup = () => {
               }, width)
             )
           ),
+          editorSelect('代码链接：'),
         ),
         // compiler
         m('.m-panel', {
@@ -321,6 +336,14 @@ var Popup = () => {
                   }, width)
                 )
               )
+            ),
+          ),
+          m('.row',
+            m('.col-xxl-6.col-xl-6.col-lg-6.col-md-6.col-sm-12',
+              m('span.m-label', '本地代码链接')
+            ),
+            m('.col-xxl-6.col-xl-6.col-lg-6.col-md-6.col-sm-12',
+              editorSelect()
             ),
           ),
           settings.render()

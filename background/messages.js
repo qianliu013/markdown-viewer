@@ -12,7 +12,7 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
         markdown = jax.tokenize(markdown)
       }
 
-      var html = compilers[state.compiler].compile(markdown)
+      var html = compilers[state.compiler].compile(markdown, {localFiles: !!sender.url && sender.url.startsWith('file:')})
 
       if (state.content.mathjax) {
         html = jax.detokenize(html)
@@ -52,6 +52,12 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
     else if (req.message === 'popup.theme') {
       await set({theme: req.theme})
       notifyContent({message: 'theme', theme: req.theme})
+      sendResponse()
+    }
+    else if (req.message === 'popup.editor') {
+      if (!['cursor', 'vscode', 'browser'].includes(req.editor)) throw new Error('Unknown editor')
+      await set({editor: req.editor})
+      notifyContent({message: 'editor', editor: req.editor})
       sendResponse()
     }
     else if (req.message === 'popup.raw') {

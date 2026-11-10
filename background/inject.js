@@ -8,6 +8,7 @@ md.inject = ({storage: {state}}) => async (id, documentId) => {
       args: [{
         theme: state.theme,
         raw: state.raw,
+        editor: state.editor,
         themes: state.themes,
         content: state.content,
         compiler: state.compiler,
@@ -41,6 +42,7 @@ md.inject = ({storage: {state}}) => async (id, documentId) => {
         state.content.mermaid && ['/vendor/mermaid.min.js', '/vendor/panzoom.min.js', '/content/mermaid.js'],
         state.content.mathjax && ['/content/mathjax.js', '/vendor/mathjax/tex-mml-chtml.js'],
         '/content/frontmatter.js',
+        '/content/editor-links.js',
         '/content/scroll.js',
         '/content/index.js',
         state.content.autoreload && '/content/autoreload.js',

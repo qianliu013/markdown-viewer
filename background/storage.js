@@ -40,6 +40,7 @@ md.storage = ({compilers}) => {
           state.theme = defaults.theme
         }
         if (!compilers[state.compiler]) state.compiler = defaults.compiler
+        if (!['cursor', 'vscode', 'browser'].includes(state.editor)) state.editor = defaults.editor
         md.storage.migrations(state)
         // Persist migrations without racing subsequent user changes.
         set(state).then(() => { md.storage.bug(state); resolve() }, reject)
@@ -58,6 +59,7 @@ md.storage.defaults = (compilers) => {
     theme: 'lapis-fzyousongjs',
     compiler: 'markdown-it',
     raw: false,
+    editor: 'cursor',
     match,
     themes: {
       width: 'auto',

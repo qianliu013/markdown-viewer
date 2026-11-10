@@ -54,5 +54,22 @@ document.querySelector('#run').onclick=async () => {
     const f=await openFixture('diagram');await wait(()=>visible(f,'#_html h1'))
     assert(f.contentDocument.querySelector('#_html').textContent.includes('Visible paragraph'),'missing prose')
   })
+  await testCase('Editor link DOM mapping and restoration (synthetic local base; no app launch)',async()=>{
+    const f=await openFixture('links');await wait(()=>visible(f,'#_html h1'))
+    const w=f.contentWindow,d=f.contentDocument,root=d.querySelector('#_html')
+    const source=Array.from(root.querySelectorAll('a')).find(a=>a.textContent==='local source')
+    assert(source.getAttribute('href')==='../src/a.wxml','HTTP document was rewritten')
+    // Exercise actual DOM using a synthetic file URL, without reading local files.
+    const base='file:///test/docs/readme.md'
+    w.editorLinks.update(root,base,'cursor')
+    assert(source.getAttribute('href')==='cursor://file/test/src/a.wxml','Cursor target incorrect')
+    w.editorLinks.update(root,base,'vscode')
+    assert(source.getAttribute('href')==='vscode://file/test/src/a.wxml','VS Code target incorrect')
+    assert(root.querySelector('a[href="./data.json"]'),'JSON changed')
+    assert(root.querySelector('a[href="https://example.com/a.ts"]'),'remote link changed')
+    assert(Array.from(root.querySelectorAll('code')).some(c=>c.textContent==='src/plain.ts' && !c.closest('a')),'plain code became a link')
+    w.editorLinks.update(root,base,'browser')
+    assert(source.getAttribute('href')==='../src/a.wxml','original target lost')
+  })
   document.querySelector('#run').disabled=false
 }

@@ -54,6 +54,8 @@ function harness(deferred = false) {
         else respond()
       }}},
     setInterval() {}, clearInterval() {}, setTimeout(fn) { context.timeout = fn }, clearTimeout() {}, parseFrontmatter: parse,
+    editorLinks: require('../content/editor-links.js'),
+    location: {href: 'file:///test.md'},
     favicon() {},
     m: Object.assign((selector, ...children) => ({selector, children}), {
       redraw() {}, trust: html => ({trusted: html}), mount: (_, component) => { context.component = component }
@@ -205,4 +207,15 @@ test('an existing view can redraw after all extension URL and messaging APIs are
   assert.doesNotThrow(() => h.component.view())
   h.render('# Preserved')
   assert.doesNotThrow(() => h.component.view())
+})
+
+
+test('render lifecycle applies editor links on create and on preference redraw', () => {
+  const h=harness(true), calls=[]
+  h.editorLinks={update:(...args)=>calls.push(args)}
+  h.update=()=>{}
+  h.oncreate.html()
+  assert.equal(calls[0][2],'cursor')
+  h.state.editor='vscode'; h.onupdate.html()
+  assert.equal(calls[1][2],'vscode')
 })

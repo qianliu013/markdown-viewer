@@ -8,6 +8,7 @@ var assetURL = (path) => extensionRoot + path.replace(/^\//, '')
 var state = {
   theme: args.theme,
   raw: args.raw,
+  editor: args.editor || 'cursor',
   themes: args.themes,
   content: args.content,
   compiler: args.compiler,
@@ -76,6 +77,10 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
     state.theme = req.theme
     m.redraw()
   }
+  else if (req.message === 'editor') {
+    state.editor = req.editor
+    m.redraw()
+  }
   else if (req.message === 'themes') {
     state.themes = req.themes
     m.redraw()
@@ -90,9 +95,12 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
   }
 })
 
+var updateEditorLinks = () => editorLinks.update($('#_html'), location.href, state.editor)
+
 var oncreate = {
   html: () => {
     update()
+    updateEditorLinks()
   }
 }
 
@@ -102,6 +110,7 @@ var onupdate = {
       state.reload.md = false
       update(true)
     }
+    updateEditorLinks()
   },
   theme: () => {
     if (state.content.mermaid) {

@@ -45,8 +45,19 @@ md.compilers['markdown-it'] = (() => {
   var ctor = ({storage: {state}}) => ({
     defaults,
     description,
-    compile: (markdown) =>
+    compile: (markdown, context = {}) =>
       mdit.mdit(state['markdown-it'])
+        .use((parser) => {
+          if (!context.localFiles) return
+          var validate = parser.validateLink
+          parser.validateLink = (url) => {
+            try {
+              var target = new URL(url)
+              if (target.protocol === 'file:' && !target.hostname) return true
+            } catch (err) {}
+            return validate(url)
+          }
+        })
         .use(mdit.anchor, {
           slugify: (s) => new mdit.slugger().slug(s)
         })
