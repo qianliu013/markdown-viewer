@@ -1,9 +1,40 @@
 
+// Font names shown in CJK scripts mark fonts that carry Chinese glyphs.
+var cjkName = /[\u3040-\u30ff\u3400-\u9fff\uac00-\ud7af]/
+
+// Code fonts are recognised by name. Measuring glyph widths also works but
+// loads every installed font (~0.5s blocking) and flags CJK and symbol fonts.
+var monoName = /mono|\bcode\b|courier|consol|menlo|monaco|等宽|等寬|\bNFM\b/i
+
+var fontGroups = (list) => {
+  var fonts = list.map((font) => ({id: font.fontId, name: font.displayName || font.fontId}))
+  var monospace = fonts.filter((font) => monoName.test(font.id) || monoName.test(font.name))
+  return {
+    cjk: fonts.filter((font) => cjkName.test(font.name)),
+    // A font with Chinese glyphs would also take over Chinese text when placed
+    // first, so it is offered as the Chinese font only.
+    latin: fonts.filter((font) => !cjkName.test(font.name)),
+    mono: monospace,
+    other: fonts.filter((font) => !monospace.includes(font)),
+  }
+}
+
 var Popup = () => {
 
   var state = {
     compiler: '',
     editor: 'cursor',
+    fonts: {},
+    // null until chrome.fontSettings answers (it does not exist in Firefox).
+    fontList: null,
+    _fonts: {
+      cjk: {label: '中文字体', empty: '默认（方正悠宋）',
+        groups: (list) => [['中文字体', list.cjk], ['其他字体', list.latin]]},
+      latin: {label: '英文字体', empty: '跟随中文字体',
+        groups: (list) => [['西文字体', list.latin]]},
+      mono: {label: '代码字体', empty: '跟随主题',
+        groups: (list) => [['等宽字体', list.mono], ['其他字体', list.other]]},
+    },
     options: {},
     content: {},
     theme: '',
@@ -110,6 +141,11 @@ var Popup = () => {
       chrome.runtime.sendMessage({message: 'popup.editor', editor: state.editor})
     },
 
+    font: (key, value) => {
+      state.fonts = Object.assign({}, state.fonts, {[key]: value})
+      chrome.runtime.sendMessage({message: 'popup.fonts', fonts: state.fonts})
+    },
+
     raw: () => {
       state.raw = !state.raw
       chrome.runtime.sendMessage({
@@ -141,6 +177,7 @@ var Popup = () => {
     state.themes = res.themes
 
     state.editor = res.editor
+    state.fonts = res.fonts || {}
     state.raw = res.raw
     state.tab = localStorage.getItem('tab') || 'theme'
     state.compilers = res.compilers
@@ -153,6 +190,13 @@ var Popup = () => {
   }
 
   chrome.runtime.sendMessage({message: 'popup'}, init)
+
+  if (chrome.fontSettings) {
+    chrome.fontSettings.getFontList((list) => {
+      state.fontList = fontGroups(list || [])
+      m.redraw()
+    })
+  }
 
   var oncreate = {
     ripple: (vnode) => {
@@ -182,6 +226,38 @@ var Popup = () => {
   }, [['cursor', 'Cursor'], ['vscode', 'VS Code'], ['browser', '浏览器']].map(([value, label]) =>
     m('option', {value, selected: state.editor === value}, prefix + label)
   ))
+
+  // In the popup only the chosen option carries the prefix, as a label.
+  var fontSelect = (key, prefix = '') => {
+    var choice = state._fonts[key]
+    var value = state.fonts[key] || ''
+    var groups = state.fontList ? choice.groups(state.fontList) : []
+    var known = !value || groups.some(([, fonts]) => fonts.some((font) => font.id === value))
+    var option = (id, name) =>
+      m('option', {value: id, selected: value === id}, (value === id ? prefix : '') + name)
+    return m('select.mdc-elevation--z2 m-select m-font', {
+      title: choice.label, onchange: (e) => events.font(key, e.target.value)
+    },
+      option('', choice.empty),
+      // Synced from a machine that has it, or not listed yet.
+      !known && option(value, value + (state.fontList ? '（本机未安装）' : '')),
+      groups.map(([label, fonts]) => fonts.length > 0 &&
+        m('optgroup', {label}, fonts.map((font) => option(font.id, font.name)))
+      )
+    )
+  }
+
+  var fontRows = () => !chrome.fontSettings ? [] :
+    Object.keys(state._fonts).map((key) =>
+      m('.row',
+        m('.col-xxl-6.col-xl-6.col-lg-6.col-md-6.col-sm-12',
+          m('span.m-label', state._fonts[key].label)
+        ),
+        m('.col-xxl-6.col-xl-6.col-lg-6.col-md-6.col-sm-12',
+          fontSelect(key)
+        ),
+      )
+    )
 
   var render = () =>
     m('#popup',
@@ -235,6 +311,11 @@ var Popup = () => {
             )
           ),
           editorSelect('代码链接：'),
+          chrome.fontSettings && [
+            fontSelect('cjk', '中文：'),
+            fontSelect('latin', '英文：'),
+            fontSelect('mono', '代码：'),
+          ],
         ),
         // compiler
         m('.m-panel', {
@@ -350,6 +431,7 @@ var Popup = () => {
               editorSelect()
             ),
           ),
+          fontRows(),
           settings.render()
         ),
         state.theme === 'custom' &&

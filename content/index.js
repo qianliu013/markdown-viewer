@@ -9,6 +9,7 @@ var state = {
   theme: args.theme,
   raw: args.raw,
   editor: args.editor || 'cursor',
+  fonts: args.fonts || {},
   themes: args.themes,
   content: args.content,
   compiler: args.compiler,
@@ -81,6 +82,10 @@ chrome.runtime.onMessage.addListener((req, sender, sendResponse) => {
   }
   else if (req.message === 'editor') {
     state.editor = req.editor
+    m.redraw()
+  }
+  else if (req.message === 'fonts') {
+    state.fonts = req.fonts
     m.redraw()
   }
   else if (req.message === 'themes') {
@@ -272,11 +277,30 @@ function mount () {
         if (state.theme === 'custom') {
           dom.push(m('style', {type: 'text/css'}, state.custom.theme))
         }
+
+        // Last, so toggling it never shifts the unkeyed siblings above.
+        dom.push(m('style#_fonts', fontCSS(state.fonts)))
       }
 
       return dom
     }
   })
+}
+
+// User fonts on top of every theme. An empty choice keeps the theme's font, so
+// default settings emit no CSS. Latin goes first: fonts are picked per
+// character, so letters use it and Chinese falls through to the CJK font.
+var fontCSS = ({cjk, latin, mono} = {}) => {
+  var quote = (name) => '"' + String(name).replace(/[\\"]/g, '\\$&').replace(/[\n\r\f]/g, '') + '"'
+  var rules = []
+  if (cjk || latin) {
+    var stack = [latin, cjk || 'FZYouSongJS'].filter(Boolean).map(quote).join(', ')
+    rules.push(`#_html, #_html :is(h1, h2, h3, h4, h5, h6), #_toc { font-family: ${stack}, "Songti SC", serif !important; }`)
+  }
+  if (mono) {
+    rules.push(`#_html :is(code, kbd, samp, pre) { font-family: ${quote(mono)}, ui-monospace, Menlo, monospace !important; }`)
+  }
+  return rules.join('\n')
 }
 
 var anchors = (html) =>

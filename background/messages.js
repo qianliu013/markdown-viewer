@@ -60,6 +60,12 @@ md.messages = ({storage: {defaults, state, set}, compilers, mathjax, xhr, webreq
       notifyContent({message: 'editor', editor: req.editor})
       sendResponse()
     }
+    else if (req.message === 'popup.fonts') {
+      var fonts = md.storage.fonts(req.fonts)
+      await set({fonts})
+      notifyContent({message: 'fonts', fonts})
+      sendResponse()
+    }
     else if (req.message === 'popup.raw') {
       await set({raw: req.raw})
       notifyContent({message: 'raw', raw: req.raw})

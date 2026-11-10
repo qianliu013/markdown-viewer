@@ -247,3 +247,43 @@ test('render lifecycle applies editor links on create and on preference redraw',
   h.state.editor='vscode'; h.onupdate.html()
   assert.equal(calls[1][2],'vscode')
 })
+
+
+test('font overrides emit nothing by default, put Latin before Chinese and stay inside CSS strings', () => {
+  const h = harness()
+  h.render('# Body')
+  const css = () => h.component.view().find(x => x.selector === 'style#_fonts').children[0]
+  assert.equal(css(), '')
+  h.state.fonts = {cjk: '', latin: 'Georgia', mono: ''}
+  assert.equal(css(), '#_html, #_html :is(h1, h2, h3, h4, h5, h6), #_toc { font-family: "Georgia", "FZYouSongJS", "Songti SC", serif !important; }')
+  h.state.fonts = {cjk: 'LXGW WenKai', latin: '', mono: 'JetBrains Mono'}
+  assert.equal(css(), '#_html, #_html :is(h1, h2, h3, h4, h5, h6), #_toc { font-family: "LXGW WenKai", "Songti SC", serif !important; }\n' +
+    '#_html :is(code, kbd, samp, pre) { font-family: "JetBrains Mono", ui-monospace, Menlo, monospace !important; }')
+  h.state.fonts = {cjk: '', latin: '', mono: 'a"}\nbody{display:none}\\'}
+  assert.equal(css(), '#_html :is(code, kbd, samp, pre) { font-family: "a\\"}body{display:none}\\\\", ui-monospace, Menlo, monospace !important; }')
+  // The fonts element is last, so adding it never shifts the unkeyed siblings.
+  const tree = h.component.view()
+  assert.equal(tree[tree.length - 1].selector, 'style#_fonts')
+})
+
+test('popup offers Chinese-named fonts as Chinese only and recognises code fonts by name', () => {
+  const h = {document: {querySelector: () => null}, Settings() {}, Custom() {}, chrome: {runtime: {sendMessage() {}}}}
+  vm.createContext(h)
+  vm.runInContext(read('popup/index.js'), h)
+  const list = [
+    {fontId: 'FZYouSongJS', displayName: '方正悠宋+ 简'}, {fontId: 'Georgia', displayName: 'Georgia'},
+    {fontId: 'Menlo', displayName: 'Menlo'}, {fontId: 'Sarasa Mono SC', displayName: '等距更纱黑体 SC'},
+    {fontId: 'Hiragino Mincho ProN', displayName: 'ヒラギノ明朝 ProN'}, {fontId: 'Noto Serif CJK SC', displayName: ''},
+    {fontId: 'Arial Unicode MS', displayName: 'Arial Unicode MS'}, {fontId: 'Cascadia Code', displayName: 'Cascadia Code'},
+    {fontId: 'LXGWWenKaiMono', displayName: '霞鹜文楷等宽'}, {fontId: 'CaskaydiaCove NFM', displayName: 'CaskaydiaCove NFM'},
+  ]
+  const groups = h.fontGroups(list)
+  const ids = fonts => fonts.map(font => font.id)
+  assert.deepEqual(ids(groups.cjk), ['FZYouSongJS', 'Sarasa Mono SC', 'Hiragino Mincho ProN', 'LXGWWenKaiMono'])
+  assert.deepEqual(ids(groups.latin), ['Georgia', 'Menlo', 'Noto Serif CJK SC', 'Arial Unicode MS', 'Cascadia Code', 'CaskaydiaCove NFM'])
+  assert.deepEqual(ids(groups.mono), ['Menlo', 'Sarasa Mono SC', 'Cascadia Code', 'LXGWWenKaiMono', 'CaskaydiaCove NFM'])
+  assert.equal(groups.other.length + groups.mono.length, list.length)
+  const popup = h.Popup().state._fonts
+  assert.deepEqual(JSON.parse(JSON.stringify(popup.latin.groups(groups).map(([label, fonts]) => [label, ids(fonts)]))),
+    [['西文字体', ['Georgia', 'Menlo', 'Noto Serif CJK SC', 'Arial Unicode MS', 'Cascadia Code', 'CaskaydiaCove NFM']]])
+})

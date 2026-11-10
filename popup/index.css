@@ -194,3 +194,8 @@ body.dark .m-button {
   background-color: #607d8b;
   -webkit-border-radius: 8px;
 }
+
+/* Font names keep their own case. */
+.m-select.m-font {
+  text-transform: none;
+}

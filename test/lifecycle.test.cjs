@@ -387,3 +387,21 @@ test('actual compilers preserve local code links; markdown-it allows file URLs o
   const remote=await w.message({message:'markdown',markdown},{tab:{id:1},url:'https://example.com/readme.md'})
   assert.doesNotMatch(remote.html,/href="file:/)
 })
+
+test('font choices default to the theme, persist before notification and drop invalid values', async () => {
+  const w=worker(); w.start({})
+  assert.deepEqual({...(await w.message({message:'popup'})).fonts},{cjk:'',latin:'',mono:''})
+  w.calls.length=0
+  await w.message({message:'popup.fonts',fonts:{cjk:'LXGW WenKai',latin:'Georgia',mono:42,extra:'x'}})
+  const saved={...(await w.message({message:'popup'})).fonts}
+  assert.deepEqual(saved,{cjk:'LXGW WenKai',latin:'Georgia',mono:''})
+  const write=w.calls.findIndex(x=>x[0]==='write'), notify=w.calls.findIndex(x=>x[0]==='notify')
+  assert.ok(write>=0 && write<notify)
+  assert.deepEqual({...w.calls[notify][1].fonts},saved)
+  const restored=worker(); restored.start({fonts:{latin:'Charter',mono:null}})
+  assert.deepEqual({...(await restored.message({message:'popup'})).fonts},{cjk:'',latin:'Charter',mono:''})
+  const injected=worker(); injected.start({fonts:{mono:'Menlo'}}); await tick()
+  injected.events.tab(1,{status:'loading'},{}); await tick(); await tick()
+  const args=injected.calls.find(x=>x[0]==='script' && x[1].args && x[1].args[0].theme)
+  assert.equal(args[1].args[0].fonts.mono,'Menlo')
+})

@@ -306,3 +306,8 @@ footer nav a {
 footer nav a:hover {
   text-decoration: underline;
 }
+
+/* Font names keep their own case. */
+.m-select.m-font {
+  text-transform: none;
+}

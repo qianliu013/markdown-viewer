@@ -33,9 +33,10 @@ md.storage = ({compilers}) => {
         if (!state.themes || typeof state.themes !== 'object') {
           state.themes = {...defaults.themes}
         }
-        for (var key of ['content', 'settings', 'custom', ...Object.keys(compilers)]) {
+        for (var key of ['content', 'settings', 'custom', 'fonts', ...Object.keys(compilers)]) {
           state[key] = Object.assign({}, defaults[key], res[key])
         }
+        state.fonts = md.storage.fonts(state.fonts)
         if (typeof state.theme !== 'string' && !(state.theme && typeof state.theme.name === 'string')) {
           state.theme = defaults.theme
         }
@@ -60,6 +61,8 @@ md.storage.defaults = (compilers) => {
     compiler: 'markdown-it',
     raw: false,
     editor: 'cursor',
+    // Empty: theme font (Chinese), follow Chinese (Latin), theme font (code).
+    fonts: {cjk: '', latin: '', mono: ''},
     match,
     themes: {
       width: 'auto',
@@ -96,6 +99,14 @@ md.storage.defaults = (compilers) => {
 
   return defaults
 }
+
+// Font choices are CSS family names; anything else falls back to the theme.
+md.storage.fonts = (fonts) =>
+  ['cjk', 'latin', 'mono'].reduce((all, key) => {
+    var value = fonts && fonts[key]
+    all[key] = typeof value === 'string' && value.length <= 200 ? value : ''
+    return all
+  }, {})
 
 md.storage.bug = async (res) => {
   // Clean up stale optional hosts after reload, never manifest-required hosts.

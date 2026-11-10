@@ -9,6 +9,7 @@ md.inject = ({storage: {state}}) => async (id, documentId) => {
         theme: state.theme,
         raw: state.raw,
         editor: state.editor,
+        fonts: state.fonts,
         themes: state.themes,
         content: state.content,
         compiler: state.compiler,
