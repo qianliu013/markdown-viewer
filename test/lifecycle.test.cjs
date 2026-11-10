@@ -126,14 +126,13 @@ test('injection waits for args and CSS, targets one document and leaves source v
   assert.ok(calls.filter(x => x !== 'css').every(x => x.target.documentIds[0] === 'doc-2'))
 })
 
-test('broken diagrams/formulas cannot keep the reading container hidden or poll forever', async () => {
+test('broken diagrams/formulas cannot keep scroll restore polling forever', async () => {
   const intervals = new Map(), timeouts = new Map(); let id = 0
-  const html = {style: {visibility: 'hidden'}}
   const body = {nodeName: 'BODY', scrollTop: 0, addEventListener() {}}
   const h = {
     state: {raw: false, content: {mermaid: true, mathjax: true}}, mj: {loaded: false},
     document: {styleSheets: [], querySelectorAll: s => s === 'code.mermaid' ? [{}] : [], getElementById() {}},
-    $: s => s === '#_html' ? html : s === '#_toc' ? null : body,
+    $: s => s === '#_toc' ? null : body,
     location: {hash: '', origin: 'file://', pathname: '/test.md'},
     localStorage: {getItem() {return '0'}}, window: {addEventListener() {}}, console,
     setInterval: cb => {intervals.set(++id, cb); return id}, clearInterval: id => intervals.delete(id),
@@ -141,7 +140,6 @@ test('broken diagrams/formulas cannot keep the reading container hidden or poll 
   }
   vm.createContext(h); vm.runInContext(read('content/scroll.js'), h)
   h.scroll()
-  assert.equal(html.style.visibility, 'visible')
   for (const fn of [...timeouts.values()]) fn()
   await tick()
   assert.equal(intervals.size, 0)

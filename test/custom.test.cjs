@@ -89,11 +89,28 @@ test('compiler errors and timeouts show readable original text, never an empty p
     h.render('# Original document')
     if (mode === 'timeout') h.timeout()
     else h.respond(mode === 'error' ? {error: 'Compiler failed'} : {})
-    assert.equal(h.state.raw, true)
+    assert.ok(!h.state.raw, 'fallback must not change the Raw preference')
     const tree = h.component.view()
     assert.ok(tree.some(x => x.selector === 'div#_render-error'))
     assert.equal(tree.find(x => x.selector === 'pre#_markdown').children[1], '# Original document')
   }
+})
+
+test('a late reply or a later successful auto reload replaces the error fallback', () => {
+  const h = harness(true)
+  h.render('# Slow document')
+  h.timeout()
+  assert.ok(h.component.view().some(x => x.selector === 'div#_render-error'))
+  h.respond()
+  let tree = h.component.view()
+  assert.ok(tree.some(x => x.selector === '#_html'))
+  assert.ok(!tree.some(x => x.selector === 'div#_render-error'))
+  h.render('# Broken'); h.respond({error: 'Compiler failed'})
+  assert.ok(h.component.view().some(x => x.selector === 'pre#_markdown'))
+  h.render('# Fixed'); h.respond()
+  tree = h.component.view()
+  assert.ok(tree.some(x => x.selector === '#_html'))
+  assert.ok(!tree.some(x => x.selector === 'pre#_markdown'))
 })
 
 test('an earlier compiler response cannot replace a newer auto-reloaded document', () => {
@@ -107,7 +124,7 @@ test('an earlier compiler response cannot replace a newer auto-reloaded document
   assert.equal(h.state.markdown, '# New')
 })
 
-test('visibility helper is injected before index can mount on an already loaded page', async () => {
+test('scroll helper is injected before index can mount on an already loaded page', async () => {
   let scripts
   const h = {
     md: {},
@@ -192,7 +209,6 @@ test('synchronous invalidated-context errors preserve the full source immediatel
   const h = harness(true)
   h.chrome.runtime.sendMessage = () => {throw new Error('Extension context invalidated.')}
   assert.doesNotThrow(() => h.render('# Original document'))
-  assert.equal(h.state.raw, true)
   assert.equal(h.state.ready, true)
   const tree = h.component.view()
   assert.equal(tree.find(x => x.selector === 'pre#_markdown').children[1], '# Original document')

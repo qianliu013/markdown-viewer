@@ -1,7 +1,7 @@
 
 var scroll = (() => {
-  // Enhancements are optional: a failed formula/diagram must not hide prose
-  // or leave polling timers running forever.
+  // Scroll restore waits for layout-changing assets, but never forever: a
+  // failed formula/diagram must not leave polling timers running.
   function waitFor (check, limit = 2000) {
     return new Promise((resolve) => {
       var stop = () => { clearInterval(interval); clearTimeout(timeout); resolve() }
@@ -66,9 +66,6 @@ var scroll = (() => {
   }
   var listening = false
   return (update) => {
-    if ($('#_html')) $('#_html').style.visibility = 'visible'
-    if ($('#_toc') && !state.raw) $('#_toc').style.visibility = 'visible'
-    if ($('#_toc') && state.raw) $('#_toc').style.visibility = 'hidden'
     onload(() => {
       var container = ((html = $('html')) => (
         html.scrollTop = 1,
@@ -93,9 +90,6 @@ var scroll = (() => {
           setTimeout(() => set($('#_toc'), 'md-toc-'), 10)
         }
       }
-
-      if ($('#_html')) $('#_html').style.visibility = 'visible'
-      if ($('#_toc') && !state.raw) $('#_toc').style.visibility = 'visible'
     })
   }
 })()

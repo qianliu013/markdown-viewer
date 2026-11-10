@@ -71,5 +71,9 @@ document.querySelector('#run').onclick=async () => {
     w.editorLinks.update(root,base,'browser')
     assert(source.getAttribute('href')==='../src/a.wxml','original target lost')
   })
+  await testCase('Missing optional editor script cannot hide the Markdown body',async()=>{
+    const f=await openFixture('missing-editor');await wait(()=>visible(f,'#_html h1'))
+    assert(f.contentDocument.querySelector('#_html').textContent.includes('Visible paragraph'),'body missing')
+  })
   document.querySelector('#run').disabled=false
 }

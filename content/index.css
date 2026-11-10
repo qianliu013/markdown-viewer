@@ -45,9 +45,9 @@ details summary {
   line-height: 1.6;
 }
 
+/* No visibility gate: content is shown as soon as it exists, even if a hook fails. */
 #_html, #_toc {
   word-wrap: break-word;
-  visibility: hidden;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -393,8 +393,16 @@ img.emojione {
   /* prevent img stretch */
   width: auto;
 }
+/* Custom themes set `#_html img {height: auto}` and center a lone image;
+   keep emoji inline at text size instead of its 64px source size. */
+#_html img.emojione {
+  display: inline-block !important;
+  height: 3ex !important;
+  margin: -.2ex .15em .2ex !important;
+  filter: none !important;
+}
 
-/* Loading/error fallback must never depend on the rendering visibility gate. */
+/* Source shown while compiling, and the compile-error banner. */
 #_source {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

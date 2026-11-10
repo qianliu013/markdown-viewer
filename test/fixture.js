@@ -17,7 +17,9 @@ window.addEventListener('load', async () => {
   }}}
   const scripts = ['/vendor/mithril.min.js','/vendor/prism.min.js','/vendor/prism-autoloader.min.js','/content/prism.js']
   if(args.content.mermaid) scripts.push('/vendor/mermaid.min.js','/vendor/panzoom.min.js','/content/mermaid.js')
-  scripts.push('/content/editor-links.js')
+  // Simulate a still-running old worker injecting the updated index without
+  // the newly introduced helper; this is not an installed-extension test.
+  if (fixtureMode !== 'missing-editor') scripts.push('/content/editor-links.js')
   scripts.push('/content/frontmatter.js','/content/scroll.js','/content/index.js')
   for(const script of scripts) await load(script)
 })

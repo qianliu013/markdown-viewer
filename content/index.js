@@ -138,11 +138,12 @@ var update = (update) => {
 var render = (md) => {
   var renderId = ++state.renderId
   state.markdown = md
+  // Errors show the source without touching the user's Raw preference, so a
+  // later successful compile (late reply or auto reload) renders normally.
   var fail = (message) => {
     if (renderId !== state.renderId) return
     state.error = message
     state.ready = true
-    state.raw = true
     state.reload.md = true
     m.redraw()
   }
@@ -209,6 +210,7 @@ function mount () {
       }
       if (state.ready) {
         if (state.error) dom.push(m('div#_render-error', {role: 'alert'}, state.error))
+        var raw = state.raw || !!state.error
         state._themes.custom = state.custom.color
 
         var color =
@@ -235,7 +237,7 @@ function mount () {
           (/^github(-dark)?$/.test(state.theme) ? 'markdown-body' : 'markdown-theme') +
           (state.themes.width !== 'auto' ? ` _width-${state.themes.width}` : '')
 
-        if (state.raw) {
+        if (raw) {
           if (state.content.syntax) {
             dom.push(m('#_markdown', {oncreate: oncreate.html, onupdate: onupdate.html, class: theme},
               m.trust(`<pre class="language-md"><code class="language-md">${_escape(state.markdown)}</code></pre>`)
@@ -261,8 +263,8 @@ function mount () {
         }
 
         if (state.content.toc) {
-          dom.push(m('#_toc.tex2jax-ignore', m.trust(state.toc)))
-          state.raw ? $('body').classList.remove('_toc-left') : $('body').classList.add('_toc-left')
+          dom.push(m('#_toc.tex2jax-ignore', {style: {visibility: raw ? 'hidden' : 'visible'}}, m.trust(state.toc)))
+          raw ? $('body').classList.remove('_toc-left') : $('body').classList.add('_toc-left')
         }
 
         if (state.theme === 'custom') {
