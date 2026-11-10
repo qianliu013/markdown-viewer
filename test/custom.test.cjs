@@ -170,7 +170,8 @@ test('defaults and migrations keep only maintained themes and preserve opt-out',
   const compilers = {'markdown-it': {defaults: {}}, marked: {defaults: {}}, remark: {defaults: {}}}
   const state = h.md.storage.defaults(compilers)
   assert.equal(state.theme, 'lapis-fzyousongjs')
-  assert.equal(state.content.frontmatter, true)
+  assert.deepEqual({...state.content},
+    {autoreload: true, emoji: true, mathjax: true, mermaid: true, syntax: true, frontmatter: true, toc: false})
   state.theme = 'custom'
   delete state.content.frontmatter
   h.md.storage.migrations(state)
